@@ -68,7 +68,9 @@ namespace api.Controllers
                     UserName = dto.Username,
                 };
 
+                _logger.LogInformation("Before user manager");
                 var createdUser = await _userManager.CreateAsync(user, dto.Password);
+                _logger.LogInformation("After user manager");
 
                 if (createdUser.Succeeded)
                 {
@@ -92,6 +94,7 @@ namespace api.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogInformation("Catch exception: " + e.Message);
                 return StatusCode(500, new { message = e });
             }
         }
