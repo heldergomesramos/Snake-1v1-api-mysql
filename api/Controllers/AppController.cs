@@ -1,27 +1,45 @@
 using api.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace api.Controllers
 {
     [Route("api/app")]
     [ApiController]
-    public class AppController(ApplicationDBContext context) : ControllerBase
+    public class AppController : ControllerBase
     {
-        private readonly ApplicationDBContext _context = context;
+        private readonly ApplicationDBContext _context;
+        private readonly ILogger<AppController> _logger;
+
+        // Inject the ApplicationDBContext and ILogger<AppController>
+        public AppController(ApplicationDBContext context, ILogger<AppController> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
 
         [HttpGet("ping")]
         public async Task<IActionResult> Ping()
         {
-            _ = await _context.Players.ToListAsync();
-            return Ok(new { message = "Ping successful" });
-        }
+            try
+            {
+                _logger.LogInformation("Ping request received.");
 
-        [HttpGet("version")]
-        public async Task<IActionResult> GetMySQLVersion()
-        {
-            var version = await _context.Database.ExecuteSqlRawAsync("SELECT VERSION();");
-            return Ok(new { version });
+                // Fetch players from the database
+                var players = await _context.Players.ToListAsync();
+
+                // Log the count of players retrieved
+                _logger.LogInformation($"Number of players retrieved: {players.Count}");
+
+                return Ok(new { message = "Ping successful" });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                _logger.LogError(ex, "An error occurred while processing the ping request.");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
         }
     }
 }
