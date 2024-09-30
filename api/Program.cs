@@ -14,7 +14,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
@@ -67,6 +66,8 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader();
         });
     });
+
+builder.Services.AddSignalR();
 
 builder.Logging.ClearProviders();
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
