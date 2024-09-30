@@ -16,12 +16,10 @@ builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSignalR();
 
-var connectionString = Environment.GetEnvironmentVariable("AZURE_MYSQL_CONNECTIONSTRING") ??
-                       builder.Configuration.GetConnectionString("DefaultConnection");
-
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 4, 2)));
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+                     new MySqlServerVersion(new Version(8, 4, 2)));
 });
 
 builder.Services.AddIdentity<Player, IdentityRole>(options =>
