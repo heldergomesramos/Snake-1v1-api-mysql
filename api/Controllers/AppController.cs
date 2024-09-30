@@ -27,10 +27,10 @@ namespace api.Controllers
                 _logger.LogInformation("Ping request received.");
 
                 // Fetch players from the database
-                var players = await _context.Players.ToListAsync();
+                //var players = await _context.Players.ToListAsync();
 
                 // Log the count of players retrieved
-                _logger.LogInformation($"Number of players retrieved: {players.Count}");
+                //_logger.LogInformation($"Number of players retrieved: {players.Count}");
 
                 return Ok(new { message = "Ping successful" });
             }
