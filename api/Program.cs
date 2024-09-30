@@ -31,21 +31,21 @@ builder.Services.AddIdentity<Player, IdentityRole>(options =>
     options.Password.RequiredUniqueChars = 0;
 }).AddEntityFrameworkStores<ApplicationDBContext>();
 
-builder.Services.AddAuthentication().AddJwtBearer(options =>
-{
-    var x = builder.Configuration["JWT:SigningKey"];
-    if (x == null)
-        x = "A"; /* Only here because null warning */
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(x))
-    };
-});
+// builder.Services.AddAuthentication().AddJwtBearer(options =>
+// {
+//     var x = builder.Configuration["JWT:SigningKey"];
+//     if (x == null)
+//         x = "A"; /* Only here because null warning */
+//     options.TokenValidationParameters = new TokenValidationParameters
+//     {
+//         ValidateIssuer = true,
+//         ValidIssuer = builder.Configuration["JWT:Issuer"],
+//         ValidateAudience = true,
+//         ValidAudience = builder.Configuration["JWT:Audience"],
+//         ValidateIssuerSigningKey = true,
+//         IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(x))
+//     };
+// });
 
 // builder.Services.AddCors(options =>
 // {
@@ -84,8 +84,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<LobbyHub>("/lobbyHub");
