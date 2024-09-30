@@ -17,13 +17,15 @@ namespace api.Controllers
         private readonly IPlayerService _playerService;
         private readonly ITokenService _tokenService;
         private readonly SignInManager<Player> _signInManager;
+        private readonly ILogger<PlayerController> _logger;
 
-        public PlayerController(UserManager<Player> userManager, IPlayerService playerService, ITokenService tokenService, SignInManager<Player> signInManager)
+        public PlayerController(UserManager<Player> userManager, IPlayerService playerService, ITokenService tokenService, SignInManager<Player> signInManager, ILogger<PlayerController> logger)
         {
             _userManager = userManager;
             _playerService = playerService;
             _tokenService = tokenService;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         [HttpGet("all")]
@@ -54,6 +56,8 @@ namespace api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] PlayerRegisterRequestDto dto)
         {
+            _logger.LogInformation("\nFirst Log");
+            _logger.LogInformation("Register from: " + dto.Username);
             try
             {
                 if (!ModelState.IsValid)
