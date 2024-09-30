@@ -17,8 +17,10 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-                     new MySqlServerVersion(new Version(8, 4, 2)));
+    var connectionString = Environment.GetEnvironmentVariable("AZURE_MYSQL_CONNECTIONSTRING") ??
+                       builder.Configuration.GetConnectionString("DefaultConnection");
+
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
 builder.Services.AddIdentity<Player, IdentityRole>(options =>
