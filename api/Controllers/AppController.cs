@@ -38,7 +38,7 @@ namespace api.Controllers
             {
                 // Log the exception
                 _logger.LogError(ex, "An error occurred while processing the ping request.");
-                return StatusCode(500, new { message = "Internal server error" });
+                return StatusCode(500, new { message = "Internal server error xD" });
             }
         }
     }
