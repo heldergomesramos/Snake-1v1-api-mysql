@@ -16,12 +16,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+string mySqlConnectionString = builder.Configuration.GetConnectionString("AZURE_MYSQL_CONNECTIONSTRING") ?? "[ERROR] CONNECTION STRING NOT FOUND";
+
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    var connectionString = Environment.GetEnvironmentVariable("AZURE_MYSQL_CONNECTIONSTRING") ??
-                       builder.Configuration.GetConnectionString("DefaultConnection");
-
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    options.UseMySql(mySqlConnectionString, ServerVersion.AutoDetect(mySqlConnectionString));
 });
 
 builder.Services.AddIdentity<Player, IdentityRole>(options =>
