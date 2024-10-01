@@ -14,15 +14,15 @@ namespace api.Controllers
     public class PlayerController : ControllerBase
     {
         // private readonly UserManager<Player> _userManager;
-        private readonly IPlayerService _playerService;
+        //private readonly IPlayerService _playerService;
         private readonly ITokenService _tokenService;
         //private readonly SignInManager<Player> _signInManager;
         private readonly ILogger<PlayerController> _logger;
         //UserManager<Player> userManager
-        public PlayerController(IPlayerService playerService, ITokenService tokenService, ILogger<PlayerController> logger)
+        public PlayerController(ITokenService tokenService, ILogger<PlayerController> logger)
         {
             //_userManager = userManager;
-            _playerService = playerService;
+            //_playerService = playerService;
             _tokenService = tokenService;
             //_signInManager = signInManager;
             _logger = logger;
@@ -47,12 +47,12 @@ namespace api.Controllers
         [HttpGet("details/{id}")]
         public async Task<IActionResult> GetPlayerDetails(string id)
         {
-            var player = await _playerService.GetPlayerSimplifiedByIdAsync(id);
+            // var player = await _playerService.GetPlayerSimplifiedByIdAsync(id);
 
-            if (player == null)
-                return NotFound("Player not found.");
+            // if (player == null)
+            //     return NotFound("Player not found.");
 
-            return Ok(player);
+            // return Ok(player);
             return Ok("A");
         }
 
@@ -61,45 +61,43 @@ namespace api.Controllers
         {
             _logger.LogInformation("\nFirst Log");
             _logger.LogInformation("Register from: " + dto.Username);
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest();
+            // try
+            // {
+            //     var user = new Player
+            //     {
+            //         UserName = dto.Username,
+            //     };
 
-                var user = new Player
-                {
-                    UserName = dto.Username,
-                };
+            //     _logger.LogInformation("Before user manager");
+            //     //var createdUser = await _userManager.CreateAsync(user, dto.Password);
+            //     _logger.LogInformation("After user manager");
 
-                _logger.LogInformation("Before user manager");
-                //var createdUser = await _userManager.CreateAsync(user, dto.Password);
-                _logger.LogInformation("After user manager");
+            //     // if (createdUser.Succeeded)
+            //     // {
+            //     //     var roleResult = await _userManager.AddToRoleAsync(user, "User");
 
-                // if (createdUser.Succeeded)
-                // {
-                //     var roleResult = await _userManager.AddToRoleAsync(user, "User");
+            //     //     if (roleResult.Succeeded)
+            //     //     {
+            //     //         var token = _tokenService.CreateToken(user);
 
-                //     if (roleResult.Succeeded)
-                //     {
-                //         var token = _tokenService.CreateToken(user);
+            //     //         var responseDto = PlayerMappers.PlayerEntityToPlayerRegister(user, token);
 
-                //         var responseDto = PlayerMappers.PlayerEntityToPlayerRegister(user, token);
-
-                //         return Ok(new { player = responseDto });
-                //     }
-                //     else
-                //         return StatusCode(500, new { message = roleResult.Errors });
-                // }
-                // else
-                // {
-                //     return StatusCode(409, new { message = createdUser.Errors });
-                // }
-            }
-            catch (Exception e)
-            {
-                _logger.LogInformation("Catch exception: " + e.Message);
-                return StatusCode(505, new { message = e });
-            }
+            //     //         return Ok(new { player = responseDto });
+            //     //     }
+            //     //     else
+            //     //         return StatusCode(500, new { message = roleResult.Errors });
+            //     // }
+            //     // else
+            //     // {
+            //     //     return StatusCode(409, new { message = createdUser.Errors });
+            //     // }
+            // }
+            // catch (Exception e)
+            // {
+            //     _logger.LogInformation("Catch exception: " + e.Message);
+            //     return StatusCode(505, new { message = e });
+            // }
+            return Ok("XD KNAo");
             return StatusCode(505, new { message = "Lmao" });
         }
 
