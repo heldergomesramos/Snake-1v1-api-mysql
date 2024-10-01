@@ -11,14 +11,12 @@ namespace api.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly ILogger<AppController> _logger;
-        private readonly IConfiguration _config;
 
         // Inject the ApplicationDBContext and ILogger<AppController>
-        public AppController(ApplicationDBContext context, ILogger<AppController> logger, IConfiguration config)
+        public AppController(ApplicationDBContext context, ILogger<AppController> logger)
         {
             _context = context;
             _logger = logger;
-            _config = config;
         }
 
         [HttpGet("ping")]
@@ -30,7 +28,6 @@ namespace api.Controllers
             try
             {
                 _logger.LogInformation("Ping request received.");
-                _logger.LogInformation(_config.GetConnectionString("AZURE_MYSQL_CONNECTIONSTRING"));
                 Console.WriteLine("CONSOLE WRITE LINE PING");
                 // Fetch players from the database
                 //var players = await _context.Players.ToListAsync();
