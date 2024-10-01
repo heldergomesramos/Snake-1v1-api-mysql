@@ -13,47 +13,44 @@ namespace api.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        // private readonly UserManager<Player> _userManager;
-        //private readonly IPlayerService _playerService;
+        private readonly UserManager<Player> _userManager;
+        private readonly IPlayerService _playerService;
         private readonly ITokenService _tokenService;
-        //private readonly SignInManager<Player> _signInManager;
+        private readonly SignInManager<Player> _signInManager;
         private readonly ILogger<PlayerController> _logger;
-        //UserManager<Player> userManager
-        public PlayerController(ITokenService tokenService, ILogger<PlayerController> logger)
+
+        public PlayerController(UserManager<Player> userManager, IPlayerService playerService, ITokenService tokenService, SignInManager<Player> signInManager, ILogger<PlayerController> logger)
         {
-            //_userManager = userManager;
-            //_playerService = playerService;
+            _userManager = userManager;
+            _playerService = playerService;
             _tokenService = tokenService;
-            //_signInManager = signInManager;
+            _signInManager = signInManager;
             _logger = logger;
         }
 
         [HttpGet("all")]
         public async Task<IActionResult> GetAllPlayers()
         {
-            //var players = await _playerService.GetAllPlayersSimplifiedAsync();
-            //return Ok(players);
-            return Ok("A");
+            var players = await _playerService.GetAllPlayersSimplifiedAsync();
+            return Ok(players);
         }
 
         [HttpGet("all-connected")]
         public IActionResult GetAllConnectedPlayers()
         {
-            //var players = PlayerManager.GetAllConnectedPlayers();
-            //return Ok(players);
-            return Ok("A");
+            var players = PlayerManager.GetAllConnectedPlayers();
+            return Ok(players);
         }
 
         [HttpGet("details/{id}")]
         public async Task<IActionResult> GetPlayerDetails(string id)
         {
-            // var player = await _playerService.GetPlayerSimplifiedByIdAsync(id);
+            var player = await _playerService.GetPlayerSimplifiedByIdAsync(id);
 
-            // if (player == null)
-            //     return NotFound("Player not found.");
+            if (player == null)
+                return NotFound("Player not found.");
 
-            // return Ok(player);
-            return Ok("A");
+            return Ok(player);
         }
 
         [HttpPost("register")]
@@ -61,71 +58,70 @@ namespace api.Controllers
         {
             _logger.LogInformation("\nFirst Log");
             _logger.LogInformation("Register from: " + dto.Username);
-            // try
-            // {
-            //     var user = new Player
-            //     {
-            //         UserName = dto.Username,
-            //     };
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest();
 
-            //     _logger.LogInformation("Before user manager");
-            //     //var createdUser = await _userManager.CreateAsync(user, dto.Password);
-            //     _logger.LogInformation("After user manager");
+                var user = new Player
+                {
+                    UserName = dto.Username,
+                };
 
-            //     // if (createdUser.Succeeded)
-            //     // {
-            //     //     var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                _logger.LogInformation("Before user manager");
+                var createdUser = await _userManager.CreateAsync(user, dto.Password);
+                _logger.LogInformation("After user manager");
 
-            //     //     if (roleResult.Succeeded)
-            //     //     {
-            //     //         var token = _tokenService.CreateToken(user);
+                if (createdUser.Succeeded)
+                {
+                    var roleResult = await _userManager.AddToRoleAsync(user, "User");
 
-            //     //         var responseDto = PlayerMappers.PlayerEntityToPlayerRegister(user, token);
+                    if (roleResult.Succeeded)
+                    {
+                        var token = _tokenService.CreateToken(user);
 
-            //     //         return Ok(new { player = responseDto });
-            //     //     }
-            //     //     else
-            //     //         return StatusCode(500, new { message = roleResult.Errors });
-            //     // }
-            //     // else
-            //     // {
-            //     //     return StatusCode(409, new { message = createdUser.Errors });
-            //     // }
-            // }
-            // catch (Exception e)
-            // {
-            //     _logger.LogInformation("Catch exception: " + e.Message);
-            //     return StatusCode(505, new { message = e });
-            // }
-            return Ok("XD KNAo");
-            return StatusCode(505, new { message = "Lmao" });
+                        var responseDto = PlayerMappers.PlayerEntityToPlayerRegister(user, token);
+
+                        return Ok(new { player = responseDto });
+                    }
+                    else
+                        return StatusCode(500, new { message = roleResult.Errors });
+                }
+                else
+                {
+                    return StatusCode(409, new { message = createdUser.Errors });
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation("Catch exception: " + e.Message);
+                return StatusCode(500, new { message = e });
+            }
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] PlayerRegisterRequestDto dto)
         {
-            //if (!ModelState.IsValid)
-            //    return BadRequest();
+            if (!ModelState.IsValid)
+                return BadRequest();
 
-            //var response = await _playerService.LoginPlayerAsync(dto);
+            var response = await _playerService.LoginPlayerAsync(dto);
 
-            // if (response == null)
-            //     return Unauthorized(new { message = "Invalid username or password." });
+            if (response == null)
+                return Unauthorized(new { message = "Invalid username or password." });
 
-            // if (PlayerManager.IsPlayerConnected(response.PlayerId))
-            //     return StatusCode(403, new { message = "Player is alredy connected." });
-            // return Ok(response);
-            return Ok("xD");
+            if (PlayerManager.IsPlayerConnected(response.PlayerId))
+                return StatusCode(403, new { message = "Player is alredy connected." });
+            return Ok(response);
         }
 
         [HttpPost("guest")]
         public IActionResult Guest()
         {
-            //var guestPlayerDto = _playerService.CreateGuest();
-            //if (guestPlayerDto == null)
-            //    return StatusCode(500, new { message = "Failed to create guest player." });
-            //return Ok(new { status = "guest_joined", player = guestPlayerDto });
-            return Ok("A");
+            var guestPlayerDto = _playerService.CreateGuest();
+            if (guestPlayerDto == null)
+                return StatusCode(500, new { message = "Failed to create guest player." });
+            return Ok(new { status = "guest_joined", player = guestPlayerDto });
         }
     }
 }
