@@ -29,10 +29,10 @@ namespace api.Controllers
                 _logger.LogInformation("Ping request received.");
                 _logger.LogInformation(_config.GetConnectionString("AZURE_MYSQL_CONNECTIONSTRING"));
                 // Fetch players from the database
-                //var players = await _context.Players.ToListAsync();
+                var players = await _context.Players.ToListAsync();
 
                 // Log the count of players retrieved
-                //_logger.LogInformation($"Number of players retrieved: {players.Count}");
+                _logger.LogInformation($"Number of players retrieved: {players.Count}");
 
                 return Ok(new { message = "Ping successful" });
             }
@@ -40,7 +40,7 @@ namespace api.Controllers
             {
                 // Log the exception
                 _logger.LogError(ex, "An error occurred while processing the ping request.");
-                return StatusCode(500, new { message = "Internal server error xD" });
+                return StatusCode(500, new { message = ex.Message });
             }
         }
     }
