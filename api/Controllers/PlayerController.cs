@@ -16,30 +16,32 @@ namespace api.Controllers
         // private readonly UserManager<Player> _userManager;
         private readonly IPlayerService _playerService;
         private readonly ITokenService _tokenService;
-        private readonly SignInManager<Player> _signInManager;
+        //private readonly SignInManager<Player> _signInManager;
         private readonly ILogger<PlayerController> _logger;
         //UserManager<Player> userManager
-        public PlayerController(IPlayerService playerService, ITokenService tokenService, SignInManager<Player> signInManager, ILogger<PlayerController> logger)
+        public PlayerController(IPlayerService playerService, ITokenService tokenService, ILogger<PlayerController> logger)
         {
             //_userManager = userManager;
             _playerService = playerService;
             _tokenService = tokenService;
-            _signInManager = signInManager;
+            //_signInManager = signInManager;
             _logger = logger;
         }
 
         [HttpGet("all")]
         public async Task<IActionResult> GetAllPlayers()
         {
-            var players = await _playerService.GetAllPlayersSimplifiedAsync();
-            return Ok(players);
+            //var players = await _playerService.GetAllPlayersSimplifiedAsync();
+            //return Ok(players);
+            return Ok("A");
         }
 
         [HttpGet("all-connected")]
         public IActionResult GetAllConnectedPlayers()
         {
-            var players = PlayerManager.GetAllConnectedPlayers();
-            return Ok(players);
+            //var players = PlayerManager.GetAllConnectedPlayers();
+            //return Ok(players);
+            return Ok("A");
         }
 
         [HttpGet("details/{id}")]
@@ -51,6 +53,7 @@ namespace api.Controllers
                 return NotFound("Player not found.");
 
             return Ok(player);
+            return Ok("A");
         }
 
         [HttpPost("register")]
@@ -95,16 +98,16 @@ namespace api.Controllers
             catch (Exception e)
             {
                 _logger.LogInformation("Catch exception: " + e.Message);
-                return StatusCode(500, new { message = e });
+                return StatusCode(505, new { message = e });
             }
-            return StatusCode(500, new { message = "Lmao" });
+            return StatusCode(505, new { message = "Lmao" });
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] PlayerRegisterRequestDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest();
+            //if (!ModelState.IsValid)
+            //    return BadRequest();
 
             //var response = await _playerService.LoginPlayerAsync(dto);
 
@@ -120,10 +123,11 @@ namespace api.Controllers
         [HttpPost("guest")]
         public IActionResult Guest()
         {
-            var guestPlayerDto = _playerService.CreateGuest();
-            if (guestPlayerDto == null)
-                return StatusCode(500, new { message = "Failed to create guest player." });
-            return Ok(new { status = "guest_joined", player = guestPlayerDto });
+            //var guestPlayerDto = _playerService.CreateGuest();
+            //if (guestPlayerDto == null)
+            //    return StatusCode(500, new { message = "Failed to create guest player." });
+            //return Ok(new { status = "guest_joined", player = guestPlayerDto });
+            return Ok("A");
         }
     }
 }
