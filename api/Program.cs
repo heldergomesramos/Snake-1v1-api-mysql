@@ -17,7 +17,7 @@ builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 // var mySqlConnectionString = builder.Configuration.GetConnectionString("AZURE_MYSQL_CONNECTIONSTRING") ?? builder.Configuration.GetConnectionString("DefaultConnection");
-var mySqlConnectionString = builder.Configuration.GetConnectionString("AZURE_MYSQL_CONNECTIONSTRING");
+var mySqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
