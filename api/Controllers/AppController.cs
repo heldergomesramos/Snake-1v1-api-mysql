@@ -24,6 +24,9 @@ namespace api.Controllers
         [HttpGet("ping")]
         public async Task<IActionResult> Ping()
         {
+            _logger.LogInformation("Ping!");
+            Console.WriteLine("ping");
+            return Ok(new { message = "Ping successful" });
             try
             {
                 _logger.LogInformation("Ping request received.");
