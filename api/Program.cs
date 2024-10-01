@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-string mySqlConnectionString = builder.Configuration.GetConnectionString("AZURE_MYSQL_CONNECTIONSTRING") ?? "[ERROR] CONNECTION STRING NOT FOUND";
+var mySqlConnectionString = builder.Configuration.GetConnectionString("AZURE_MYSQL_CONNECTIONSTRING") ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {

@@ -12,8 +12,8 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240929165437_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241001160607_InitialCreateB")]
+    partial class InitialCreateB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,13 +53,13 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "513153e4-65d6-4a21-98e4-97b9c747348a",
+                            Id = "d3840438-b8e8-4d2e-94f6-230a41b22186",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "8419a0ad-3dcf-4969-a48f-1ee14c6c5c49",
+                            Id = "7cb01a69-de8b-4145-b8c6-832a81f34d1d",
                             Name = "User",
                             NormalizedName = "USER"
                         });
