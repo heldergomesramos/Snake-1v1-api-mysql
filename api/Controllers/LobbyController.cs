@@ -13,9 +13,9 @@ namespace api.Controllers
     public class LobbyController : ControllerBase
     {
         private readonly ILogger<LobbyController> _logger;
-        private readonly IHubContext<LobbyHub> _hubContext;
+        private readonly IHubContext<GameHub> _hubContext;
 
-        public LobbyController(ILogger<LobbyController> logger, IHubContext<LobbyHub> hubContext)
+        public LobbyController(ILogger<LobbyController> logger, IHubContext<GameHub> hubContext)
         {
             _logger = logger;
             _hubContext = hubContext;
