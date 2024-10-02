@@ -56,7 +56,6 @@ namespace api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] PlayerRegisterRequestDto dto)
         {
-            _logger.LogInformation("\nFirst Log");
             _logger.LogInformation("Register from: " + dto.Username);
             try
             {
@@ -68,9 +67,7 @@ namespace api.Controllers
                     UserName = dto.Username,
                 };
 
-                _logger.LogInformation("Before user manager");
                 var createdUser = await _userManager.CreateAsync(user, dto.Password);
-                _logger.LogInformation("After user manager");
 
                 if (createdUser.Succeeded)
                 {
@@ -82,7 +79,7 @@ namespace api.Controllers
 
                         var responseDto = PlayerMappers.PlayerEntityToPlayerRegister(user, token);
 
-                        return Ok(new { player = responseDto });
+                        return Ok(responseDto);
                     }
                     else
                         return StatusCode(500, new { message = roleResult.Errors });
@@ -94,7 +91,6 @@ namespace api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogInformation("Catch exception: " + e.Message);
                 return StatusCode(500, new { message = e });
             }
         }
@@ -102,6 +98,7 @@ namespace api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] PlayerRegisterRequestDto dto)
         {
+            _logger.LogInformation("Login from: " + dto.Username);
             if (!ModelState.IsValid)
                 return BadRequest();
 
@@ -118,6 +115,7 @@ namespace api.Controllers
         [HttpPost("guest")]
         public IActionResult Guest()
         {
+            _logger.LogInformation("Guest joined");
             var guestPlayerDto = _playerService.CreateGuest();
             if (guestPlayerDto == null)
                 return StatusCode(500, new { message = "Failed to create guest player." });

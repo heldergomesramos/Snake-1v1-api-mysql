@@ -9,12 +9,12 @@ using System.Text.RegularExpressions;
 
 namespace api.Hubs
 {
-    public class LobbyHub : Hub
+    public class GameHub : Hub
     {
         private readonly IPlayerService _playerService;
-        private readonly IHubContext<LobbyHub> _hubContext;
+        private readonly IHubContext<GameHub> _hubContext;
 
-        public LobbyHub(IPlayerService playerService, IHubContext<LobbyHub> hubContext)
+        public GameHub(IPlayerService playerService, IHubContext<GameHub> hubContext)
         {
             _playerService = playerService;
             _hubContext = hubContext;
@@ -52,6 +52,11 @@ namespace api.Hubs
                 PlayerManager.RemoveConnection(Context.ConnectionId);
             }
             await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task Ping()
+        {
+            await Clients.Caller.SendAsync("Pong");
         }
 
         public async Task JoinPublicLobby()
@@ -288,7 +293,7 @@ namespace api.Hubs
 
         /* Static Methods */
 
-        public static async Task AddPlayerToLobby(string playerId, GenericLobby lobby, object lobbyDto, IHubContext<LobbyHub> hubContext)
+        public static async Task AddPlayerToLobby(string playerId, GenericLobby lobby, object lobbyDto, IHubContext<GameHub> hubContext)
         {
             var connectionId = PlayerManager.GetConnectionIdByPlayerId(playerId);
             if (string.IsNullOrEmpty(connectionId))
@@ -297,7 +302,7 @@ namespace api.Hubs
             await hubContext.Clients.Group(lobby.LobbyId).SendAsync("LobbyUpdated", lobbyDto);
         }
 
-        public static async Task UpdateLobby(string lobbyId, object lobbyDto, IHubContext<LobbyHub> hubContext)
+        public static async Task UpdateLobby(string lobbyId, object lobbyDto, IHubContext<GameHub> hubContext)
         {
             await hubContext.Clients.Group(lobbyId).SendAsync("LobbyUpdated", lobbyDto);
         }

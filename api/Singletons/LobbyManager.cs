@@ -70,17 +70,17 @@ namespace api.Singletons
             return null;
         }
 
-        public static async Task<LobbyResponseDto?> CreatePrivateLobby(PlayerSimplified player, IHubContext<LobbyHub> hubContext)
+        public static async Task<LobbyResponseDto?> CreatePrivateLobby(PlayerSimplified player, IHubContext<GameHub> hubContext)
         {
             var newLobby = new GenericLobby(player);
             _privateLobbies.Add(newLobby);
             player.Lobby = newLobby;
             var lobbyDto = LobbyMappers.ToResponseDto(newLobby);
-            await LobbyHub.AddPlayerToLobby(player.PlayerId, newLobby, lobbyDto, hubContext);
+            await GameHub.AddPlayerToLobby(player.PlayerId, newLobby, lobbyDto, hubContext);
             return lobbyDto;
         }
 
-        public static async Task<LobbyResponseDto?> JoinPrivateLobby(PlayerSimplified player, string code, IHubContext<LobbyHub> hubContext)
+        public static async Task<LobbyResponseDto?> JoinPrivateLobby(PlayerSimplified player, string code, IHubContext<GameHub> hubContext)
         {
             var lobbyFound = _privateLobbies.Find(x => x.Code == code);
             if (lobbyFound == null || lobbyFound.GameStarted)
@@ -93,12 +93,12 @@ namespace api.Singletons
                 return null;
             player.Lobby = lobbyFound;
             var lobbyDto = LobbyMappers.ToResponseDto(lobbyFound);
-            await LobbyHub.AddPlayerToLobby(player.PlayerId, lobbyFound, lobbyDto, hubContext);
+            await GameHub.AddPlayerToLobby(player.PlayerId, lobbyFound, lobbyDto, hubContext);
 
             return lobbyDto;
         }
 
-        public static async Task LeaveLobby(PlayerSimplified player, IHubContext<LobbyHub> hubContext)
+        public static async Task LeaveLobby(PlayerSimplified player, IHubContext<GameHub> hubContext)
         {
             if (player.Lobby == null)
                 return;
@@ -108,7 +108,7 @@ namespace api.Singletons
                 await LeavePrivateLobby(player.PlayerId, player.Lobby, hubContext);
         }
 
-        public static async Task LeavePublicLobby(GenericLobby lobbyFound, IHubContext<LobbyHub> hubContext)
+        public static async Task LeavePublicLobby(GenericLobby lobbyFound, IHubContext<GameHub> hubContext)
         {
             if (lobbyFound == null)
                 return;
@@ -128,7 +128,7 @@ namespace api.Singletons
             }
         }
 
-        public static async Task LeavePrivateLobby(string playerId, GenericLobby lobbyFound, IHubContext<LobbyHub> hubContext)
+        public static async Task LeavePrivateLobby(string playerId, GenericLobby lobbyFound, IHubContext<GameHub> hubContext)
         {
             if (lobbyFound == null)
                 return;
