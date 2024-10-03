@@ -13,6 +13,13 @@ namespace api.Models
         public static readonly int GHOST_COOLDOWN = 20000;
         public static readonly int FREEZE_TURNS = 5;
         public static readonly int GHOST_TURNS = 3;
+        public static readonly int APPLE_POINTS = 100;
+        public static readonly int GOLDEN_APPLE_POINTS = 300;
+        public static readonly int ROTTEN_APPLE_POINTS = 50;
+        public static readonly int ROTTEN_GOLDEN_APPLE_POINTS = 50;
+        public static readonly int ROTTEN_APPLE_LIFESPAN = 5;
+        public static readonly int APPLE_LIFESPAN = 20;
+        public static readonly int GOLDEN_APPLE_CHANCE = 10; /* Chance = 1 / GOLDEN_APPLE_CHANCE */
 
         private static readonly int tileVariations = 16;
         public string GameId { get; private set; } = string.Empty;
@@ -22,7 +29,7 @@ namespace api.Models
         public int[][] GroundLayer { get; private set; }
         public IEntity?[][] EntityLayer { get; private set; }
 
-        /* This should be in a separate ingame player class */
+        /* This should be in a separate ingame player class but oh well */
         public int Player1Score { get; private set; } = 0;
         public int Player2Score { get; private set; } = 0;
         public int Player1Cooldown { get; private set; } = 0;
@@ -63,136 +70,6 @@ namespace api.Models
             SinglePlayerCollision
         }
         public FinishedState FState { get; set; } = FinishedState.NotFinished;
-
-        public abstract class IEntity(int x, int y)
-        {
-            public int X { get; set; } = x;
-            public int Y { get; set; } = y;
-            public abstract string ToData();
-        }
-
-        public class SnakeSegment(int x, int y, string direction, string type, int playerNumber) : IEntity(x, y)
-        {
-            public int PlayerNumber { get; set; } = playerNumber;
-            public string Direction { get; set; } = direction;
-            public string Type { get; set; } = type;
-
-            public override string ToData()
-            {
-                return $"snake{PlayerNumber}-{Type}-{Direction}";
-            }
-
-            public override string ToString()
-            {
-                return ToData() + "-" + X + "-" + Y;
-            }
-        }
-
-        public class Apple(int x, int y) : IEntity(x, y)
-        {
-            public override string ToData()
-            {
-                return "apple";
-            }
-        }
-
-        public class Snake
-        {
-            public string PlayerId { get; set; } = string.Empty;
-            public int PlayerNumber;
-            public LinkedList<SnakeSegment> Segments { get; set; } = [];
-            public SnakeSegment Head { get; set; }
-            public SnakeSegment Tail { get; set; }
-            public bool HasCollided { get; set; } = false;
-            public bool HasSwapped { get; set; } = false;
-            public int FrozenMoves { get; set; } = 0;
-            public Game Game { get; set; }
-
-            public Snake(string playerId, int playerNumber, int gameHeight, int gameWidth, Game game)
-            {
-                Game = game;
-                PlayerId = playerId;
-                PlayerNumber = playerNumber;
-                int y; // Vertical position (row)
-                int tailX, bodyX, headX; // Horizontal positions (columns)
-                // Determine the vertical position based on the board height (center-ish)
-                if (gameHeight % 2 == 0)
-                {
-                    // If the board height is even, snake 1 is at index 4, snake 2 at index 5
-                    y = playerNumber == 1 ? (gameHeight / 2) - 1 : (gameHeight / 2);
-                }
-                else
-                {
-                    // If the board height is odd, snake 1 is at index 4, snake 2 at index 6
-                    y = playerNumber == 1 ? (gameHeight / 2) - 1 : (gameHeight / 2) + 1;
-                }
-
-                if (playerNumber == 1)
-                {
-                    // Snake 1 faces right
-                    tailX = 1; // Tail near the left edge
-                    bodyX = 2;
-                    headX = 3; // Head points towards the right
-                }
-                else
-                {
-                    // Snake 2 faces left
-                    tailX = gameWidth - 2; // Tail near the right edge
-                    bodyX = gameWidth - 3;
-                    headX = gameWidth - 4; // Head points towards the left
-                }
-
-                // Create the segments for the snake
-                Tail = new SnakeSegment(tailX, y, playerNumber == 1 ? "r" : "l", "tail", playerNumber);
-                var body = new SnakeSegment(bodyX, y, "h", "body", playerNumber);
-                Head = new SnakeSegment(headX, y, playerNumber == 1 ? "r" : "l", "head", playerNumber);
-
-                Segments.AddLast(body);
-            }
-
-            public void Swap(string playerId)
-            {
-                var headX = Head.X;
-                var headY = Head.Y;
-                var headDir = Head.Direction;
-
-                Head.X = Tail.X;
-                Head.Y = Tail.Y;
-                Head.Direction = GetOppositeDirection(Tail.Direction);
-
-                Tail.X = headX;
-                Tail.Y = headY;
-                Tail.Direction = GetOppositeDirection(headDir);
-
-                if (Segments.Count > 1)
-                {
-                    var reversedSegments = new LinkedList<SnakeSegment>(Segments);
-                    Segments.Clear();
-                    foreach (var segment in reversedSegments.Reverse())
-                        Segments.AddLast(segment);
-                }
-
-                Game.DirectionCommand[playerId] = Head.Direction[0];
-                HasSwapped = true;
-            }
-
-            public void Freeze()
-            {
-                FrozenMoves = FREEZE_TURNS;
-            }
-        }
-
-        private static string GetOppositeDirection(string ogDirection)
-        {
-            return ogDirection switch
-            {
-                "l" => "r",
-                "u" => "d",
-                "r" => "l",
-                "d" => "u",
-                _ => " ",
-            };
-        }
 
         public Game(GenericLobby lobby)
         {
@@ -244,6 +121,52 @@ namespace api.Models
             Player1Score = 0;
             Player2Score = 0;
             GameTick = 0;
+        }
+
+        public async Task StartGameLoop(Func<Game, Task> onTick)
+        {
+            Console.WriteLine("Start Game Loop");
+            Time = 3000;
+            while (Time > 0)
+            {
+                await Task.Delay(1000);
+                if (GState == GameState.Finished)
+                    break;
+                Time -= 1000;
+                Console.WriteLine("1 second passed: " + Time);
+                try
+                {
+                    await onTick(this);
+                }
+                catch
+                {
+                    Console.WriteLine("Something went wrong");
+                }
+            }
+            if (GState == GameState.Waiting)
+                GState = GameState.InProgress;
+            while (GState == GameState.InProgress)
+            {
+                await Task.Delay(TickInterval);
+                Player1Cooldown -= TickInterval;
+                Player2Cooldown -= TickInterval;
+                Console.WriteLine("\nCD: " + Player1Cooldown + "\n");
+                UpdateGameState();
+                await onTick(this);
+            }
+            Console.WriteLine("Game has ended");
+        }
+
+        public static string GetOppositeDirection(string ogDirection)
+        {
+            return ogDirection switch
+            {
+                "l" => "r",
+                "u" => "d",
+                "r" => "l",
+                "d" => "u",
+                _ => " ",
+            };
         }
 
         private PlayerSimplified? GetPlayerSimplifiedByPlayerId(string playerId)
@@ -305,40 +228,6 @@ namespace api.Models
                 Player2WantsRematch = !Player2WantsRematch;
         }
 
-        public async Task StartGameLoop(Func<Game, Task> onTick)
-        {
-            Console.WriteLine("Start Game Loop");
-            Time = 3000;
-            while (Time > 0)
-            {
-                await Task.Delay(1000);
-                if (GState == GameState.Finished)
-                    break;
-                Time -= 1000;
-                Console.WriteLine("1 second passed: " + Time);
-                try
-                {
-                    await onTick(this);
-                }
-                catch
-                {
-                    Console.WriteLine("Something went wrong");
-                }
-            }
-            if (GState == GameState.Waiting)
-                GState = GameState.InProgress;
-            while (GState == GameState.InProgress)
-            {
-                await Task.Delay(TickInterval);
-                Player1Cooldown -= TickInterval;
-                Player2Cooldown -= TickInterval;
-                Console.WriteLine("\nCD: " + Player1Cooldown + "\n");
-                UpdateGameState();
-                await onTick(this);
-            }
-            Console.WriteLine("Game has ended");
-        }
-
         public void SpawnApple()
         {
             Random random = new();
@@ -353,7 +242,9 @@ namespace api.Models
             }
             while (EntityLayer[randomRow][randomColumn] != null);
 
-            var newApple = new Apple(randomColumn, randomRow);
+            bool isGoldenApple = random.Next(0, GOLDEN_APPLE_CHANCE) == 0;
+
+            var newApple = isGoldenApple ? new Apple(randomColumn, randomRow) : new GoldenApple(randomColumn, randomRow);
             EntityLayer[randomRow][randomColumn] = newApple;
             CurApple = newApple;
         }
@@ -479,14 +370,14 @@ namespace api.Models
                     break;
             }
 
-            if (EntityLayer[snake.Head.Y][snake.Head.X] is Apple)
+            if (EntityLayer[snake.Head.Y][snake.Head.X] is Apple apple)
             {
                 SnakeSegment newSegment = new(prevHeadX, prevHeadY, afterHeadSegmentDirection, "body", snake.PlayerNumber);
                 snake.Segments.AddFirst(newSegment);
                 if (snake.PlayerNumber == 1)
-                    Player1Score += 100;
+                    Player1Score += apple.Eat();
                 else
-                    Player2Score += 100;
+                    Player2Score += apple.Eat();
                 SpawnApple();
             }
             else
@@ -666,6 +557,12 @@ namespace api.Models
             DetectSinglePlayerCollisions();
             DetectMultiPlayerCollisions();
             EndGameIfCollisionDetected();
+            if (CurApple != null)
+            {
+                CurApple.movesLeft--;
+                if (CurApple.movesLeft <= 0)
+                    SpawnApple();
+            }
 
             if (GState == GameState.Finished)
             {
@@ -764,69 +661,6 @@ namespace api.Models
             var newData = new GameData(this);
             EntityLayerDataCopy = newData.EntityLayer;
             return newData;
-        }
-
-        public class GameData
-        {
-            public string GameId { get; private set; } = string.Empty;
-            public LobbyResponseDto Lobby { get; private set; }
-
-            public int[][] GroundLayer { get; private set; }
-            public string[][] EntityLayer { get; private set; }
-
-            public int Player1Score { get; private set; } = 0;
-            public int Player2Score { get; private set; } = 0;
-            public int Player1Cooldown { get; private set; } = 0;
-            public int Player2Cooldown { get; private set; } = 0;
-            public bool Player1Frozen { get; private set; } = false;
-            public bool Player2Frozen { get; private set; } = false;
-            public int GameTick { get; private set; } = 0;
-            public int Time { get; private set; } = 3;
-
-            public bool IsSinglePlayer { get; private set; }
-
-            public string FinishedState { get; private set; } = Game.FinishedState.NotFinished.ToString();
-
-            public GameData(Game game)
-            {
-                GameId = game.GameId;
-                Lobby = LobbyMappers.ToResponseDto(game.Lobby);
-                GroundLayer = game.GroundLayer;
-                EntityLayer = game.GState == GameState.Finished ? game.EntityLayerDataCopy : EntityLayerToData(game.EntityLayer);
-                Player1Score = game.Player1Score;
-                Player2Score = game.Player2Score;
-                Player1Cooldown = (int)Math.Ceiling(game.Player1Cooldown / 1000.0);
-                Player2Cooldown = (int)Math.Ceiling(game.Player2Cooldown / 1000.0);
-                var snake1 = game.GetPlayerSnake(1);
-                var snake2 = game.GetPlayerSnake(2);
-                Player1Frozen = snake1 != null && snake1.FrozenMoves > 0;
-                Player2Frozen = snake2 != null && snake2.FrozenMoves > 0;
-                GameTick = game.GameTick;
-                Time = game.Time / 1000;
-                FinishedState = game.FState.ToString();
-                IsSinglePlayer = game.IsSinglePlayer;
-            }
-
-            private static string[][] EntityLayerToData(IEntity?[][] layer)
-            {
-                int height = layer.Length;
-                int width = layer[0].Length;
-
-                string[][] dataLayer = new string[height][];
-
-                for (int i = 0; i < height; i++)
-                {
-                    dataLayer[i] = new string[width];
-                    for (int j = 0; j < width; j++)
-                    {
-                        if (layer[i][j] != null)
-                            dataLayer[i][j] = layer[i][j]!.ToData();
-                        else
-                            dataLayer[i][j] = "empty";
-                    }
-                }
-                return dataLayer;
-            }
         }
     }
 }
