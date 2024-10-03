@@ -4,10 +4,10 @@ namespace api.Models
 {
     public class GameSettings
     {
-        public int Speed { get; set; } = 2;
+        public int Speed { get; set; } = 3;
         public int Width { get; set; } = 10;
         public int Height { get; set; } = 10;
-        public int Time { get; set; } = 180;
+        public int Time { get; set; } = 120;
         public bool Borders { get; set; } = false;
         public bool Abilities { get; set; } = true;
         public int Map { get; set; } = 0;
@@ -39,7 +39,7 @@ namespace api.Models
                 Speed = speed,
                 Width = random.Next(10, 21),
                 Height = random.Next(10, 21),
-                Time = 180,
+                Time = 120,
                 // Borders = random.Next(0, 2) == 1,
                 Borders = false,
                 Abilities = true,
