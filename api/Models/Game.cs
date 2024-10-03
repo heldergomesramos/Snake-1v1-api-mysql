@@ -1,14 +1,10 @@
-using api.Controllers;
-using api.Dtos.Lobby;
 using api.Dtos.Player;
-using api.Mappers;
-using Microsoft.VisualBasic;
 
 namespace api.Models
 {
     public class Game
     {
-        public static readonly int SWAP_COOLDOWN = 10000;
+        public static readonly int SWAP_COOLDOWN = 8000;
         public static readonly int FREEZE_COOLDOWN = 15000;
         public static readonly int GHOST_COOLDOWN = 20000;
         public static readonly int FREEZE_TURNS = 5;
@@ -18,7 +14,7 @@ namespace api.Models
         public static readonly int ROTTEN_APPLE_POINTS = 50;
         public static readonly int ROTTEN_GOLDEN_APPLE_POINTS = 50;
         public static readonly int ROTTEN_APPLE_LIFESPAN = 5;
-        public static readonly int APPLE_LIFESPAN = 20;
+        public static readonly int APPLE_LIFESPAN = 35;
         public static readonly int GOLDEN_APPLE_CHANCE = 10; /* Chance = 1 / GOLDEN_APPLE_CHANCE */
 
         private static readonly int tileVariations = 16;
@@ -144,7 +140,10 @@ namespace api.Models
                 }
             }
             if (GState == GameState.Waiting)
+            {
                 GState = GameState.InProgress;
+                Time = Lobby.GameSettings!.Time * 1000;
+            }
             while (GState == GameState.InProgress)
             {
                 await Task.Delay(TickInterval);
@@ -244,7 +243,7 @@ namespace api.Models
 
             bool isGoldenApple = random.Next(0, GOLDEN_APPLE_CHANCE) == 0;
 
-            var newApple = isGoldenApple ? new Apple(randomColumn, randomRow) : new GoldenApple(randomColumn, randomRow);
+            var newApple = isGoldenApple ? new GoldenApple(randomColumn, randomRow) : new Apple(randomColumn, randomRow);
             EntityLayer[randomRow][randomColumn] = newApple;
             CurApple = newApple;
         }
@@ -537,9 +536,9 @@ namespace api.Models
 
         public void UpdateGameState()
         {
-            Time += TickInterval;
+            Time -= TickInterval;
             GameTick++;
-            if (Time >= Lobby.GameSettings!.Time * 1000)
+            if (Time <= 0)
             {
                 if (IsSinglePlayer)
                     EndGame(FinishedState.SinglePlayerTimeOut);
