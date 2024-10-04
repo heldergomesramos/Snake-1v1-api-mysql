@@ -107,8 +107,6 @@ namespace api.Models
                 AddSnakeToEntityLayer(sn.Value);
 
             SpawnApple();
-            foreach (var meat in SnakeMeats)
-                EntityLayer[meat.Y][meat.X] = meat;
 
             EntityLayerDataCopy = new string[height][];
             for (int i = 0; i < height; i++)
@@ -416,32 +414,7 @@ namespace api.Models
                 // Else update new tail position to be the previous last segment.
                 snake.Tail.X = prevLastSegmentX;
                 snake.Tail.Y = prevLastSegmentY;
-
-                if ((prevLastSegmentDirection == "ru" || prevLastSegmentDirection == "lu") && (snake.Tail.Direction == "l" || snake.Tail.Direction == "r"))
-                {
-                    snake.Tail.Direction = "u";
-                }
-                else if (prevLastSegmentDirection == "ru" && snake.Tail.Direction == "d")
-                {
-                    snake.Tail.Direction = "r";
-                }
-                else if (prevLastSegmentDirection == "lu" && snake.Tail.Direction == "d")
-                {
-                    snake.Tail.Direction = "l";
-                }
-
-                else if ((prevLastSegmentDirection == "rd" || prevLastSegmentDirection == "ld") && (snake.Tail.Direction == "l" || snake.Tail.Direction == "r"))
-                {
-                    snake.Tail.Direction = "d";
-                }
-                else if (prevLastSegmentDirection == "rd" && snake.Tail.Direction == "u")
-                {
-                    snake.Tail.Direction = "r";
-                }
-                else if (prevLastSegmentDirection == "ld" && snake.Tail.Direction == "u")
-                {
-                    snake.Tail.Direction = "l";
-                }
+                snake.Tail.Direction = Snake.GetTailDirection(prevLastSegmentDirection, snake.Tail.Direction);
             }
         }
 
@@ -603,6 +576,10 @@ namespace api.Models
 
             foreach (var sn in Snakes)
                 AddSnakeToEntityLayer(sn.Value);
+
+            foreach (var meat in SnakeMeats)
+                EntityLayer[meat.Y][meat.X] = meat;
+
             if (CurApple != null)
                 EntityLayer[CurApple.Y][CurApple.X] = CurApple;
         }

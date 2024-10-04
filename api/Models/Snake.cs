@@ -94,7 +94,25 @@ namespace api.Models
             Segments.Remove(lastSegment);
             Tail.X = lastSegment.X;
             Tail.Y = lastSegment.Y;
+            Tail.Direction = GetTailDirection(lastSegment.Direction, Tail.Direction);
             return meat;
+        }
+
+        public static string GetTailDirection(string prevLastSegmentDirection, string tailDirection)
+        {
+            if ((prevLastSegmentDirection == "ru" || prevLastSegmentDirection == "lu") && (tailDirection == "l" || tailDirection == "r"))
+                return "u";
+            else if (prevLastSegmentDirection == "ru" && tailDirection == "d")
+                return "r";
+            else if (prevLastSegmentDirection == "lu" && tailDirection == "d")
+                return "l";
+            else if ((prevLastSegmentDirection == "rd" || prevLastSegmentDirection == "ld") && (tailDirection == "l" || tailDirection == "r"))
+                return "d";
+            else if (prevLastSegmentDirection == "rd" && tailDirection == "u")
+                return "r";
+            else if (prevLastSegmentDirection == "ld" && tailDirection == "u")
+                return "l";
+            return tailDirection;
         }
     }
 }
