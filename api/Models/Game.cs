@@ -107,6 +107,8 @@ namespace api.Models
                 AddSnakeToEntityLayer(sn.Value);
 
             SpawnApple();
+            foreach (var meat in SnakeMeats)
+                EntityLayer[meat.Y][meat.X] = meat;
 
             EntityLayerDataCopy = new string[height][];
             for (int i = 0; i < height; i++)
