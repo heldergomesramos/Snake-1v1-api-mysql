@@ -6,15 +6,10 @@ namespace api.Models
     {
         public static readonly int SWAP_COOLDOWN = 8000;
         public static readonly int FREEZE_COOLDOWN = 15000;
-        public static readonly int GHOST_COOLDOWN = 20000;
+        public static readonly int CUT_TAIL_COOLDOWN = 20000;
+
         public static readonly int FREEZE_TURNS = 5;
-        public static readonly int GHOST_TURNS = 3;
-        public static readonly int APPLE_POINTS = 100;
-        public static readonly int GOLDEN_APPLE_POINTS = 300;
-        public static readonly int ROTTEN_APPLE_POINTS = 50;
-        public static readonly int ROTTEN_GOLDEN_APPLE_POINTS = 50;
-        public static readonly int ROTTEN_APPLE_LIFESPAN = 5;
-        public static readonly int APPLE_LIFESPAN = 35;
+
         public static readonly int GOLDEN_APPLE_CHANCE = 10; /* Chance = 1 / GOLDEN_APPLE_CHANCE */
 
         private static readonly int tileVariations = 16;
@@ -40,6 +35,7 @@ namespace api.Models
         public Dictionary<string, Snake> Snakes { get; private set; } = [];
         public Dictionary<string, char> DirectionCommand { get; private set; } = [];
         public Apple? CurApple { get; private set; }
+        public List<SnakeMeat> SnakeMeats { get; private set; } = [];
 
         public string[][] EntityLayerDataCopy { get; private set; }
 
@@ -91,6 +87,8 @@ namespace api.Models
             EntityLayer = new IEntity[height][];
             for (int i = 0; i < height; i++)
                 EntityLayer[i] = new IEntity[width];
+
+
 
             if (lobby.Player1 != null)
             {
@@ -193,11 +191,15 @@ namespace api.Models
             if ((IsPlayer1(playerId) && Player1Cooldown > 0) || Player2Cooldown > 0)
                 return;
 
+            var playerSnake = Snakes[player.PlayerId];
+            if (playerSnake.FrozenMoves > 0)
+                return;
+
             switch (player.Ability)
             {
                 //Swap
                 case 0:
-                    Snakes[player.PlayerId].Swap(playerId);
+                    playerSnake.Swap(playerId);
                     if (IsPlayer1(playerId))
                         Player1Cooldown = SWAP_COOLDOWN;
                     else
@@ -213,8 +215,17 @@ namespace api.Models
                     else
                         Player2Cooldown = FREEZE_COOLDOWN;
                     break;
-                //Ghost
-                case 2: break;
+                //Cut Tail
+                case 2:
+                    if (playerSnake.Segments.Count <= 1)
+                        return;
+
+                    SnakeMeats.Add(playerSnake.CutTail());
+                    if (IsPlayer1(playerId))
+                        Player1Cooldown = CUT_TAIL_COOLDOWN;
+                    else
+                        Player2Cooldown = CUT_TAIL_COOLDOWN;
+                    break;
                 default: return;
             }
         }
@@ -369,15 +380,18 @@ namespace api.Models
                     break;
             }
 
-            if (EntityLayer[snake.Head.Y][snake.Head.X] is Apple apple)
+            if (EntityLayer[snake.Head.Y][snake.Head.X] is Food food)
             {
                 SnakeSegment newSegment = new(prevHeadX, prevHeadY, afterHeadSegmentDirection, "body", snake.PlayerNumber);
                 snake.Segments.AddFirst(newSegment);
                 if (snake.PlayerNumber == 1)
-                    Player1Score += apple.Eat();
+                    Player1Score += food.Eat();
                 else
-                    Player2Score += apple.Eat();
-                SpawnApple();
+                    Player2Score += food.Eat();
+                if (food is Apple)
+                    SpawnApple();
+                else if (food is SnakeMeat meat)
+                    SnakeMeats.Remove(meat);
             }
             else
             {
@@ -556,12 +570,15 @@ namespace api.Models
             DetectSinglePlayerCollisions();
             DetectMultiPlayerCollisions();
             EndGameIfCollisionDetected();
+
             if (CurApple != null)
             {
-                CurApple.movesLeft--;
-                if (CurApple.movesLeft <= 0)
+                CurApple.MovesLeft--;
+                if (CurApple.MovesLeft <= 0)
                     SpawnApple();
             }
+
+            SnakeMeats.RemoveAll(meat => meat.MovesLeft <= 0);
 
             if (GState == GameState.Finished)
             {

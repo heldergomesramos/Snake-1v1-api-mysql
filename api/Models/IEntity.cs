@@ -24,31 +24,47 @@ namespace api.Models
         }
     }
 
-    public class Apple(int x, int y) : IEntity(x, y)
+    public abstract class Food(int x, int y) : IEntity(x, y)
     {
-        public int movesLeft = Game.APPLE_LIFESPAN;
+        public int MovesLeft { get; set; } = 35;
+        public abstract int NormalScore { get; set; }
+        public abstract int RottenScore { get; set; }
+        public int RottenLifespan { get; set; } = 5;
+        public abstract string NormalData { get; set; }
+        public abstract string RottenData { get; set; }
 
-        public virtual int Eat()
+        public int Eat()
         {
-            return movesLeft > Game.ROTTEN_APPLE_LIFESPAN ? Game.APPLE_POINTS : Game.ROTTEN_APPLE_POINTS;
+            return MovesLeft > RottenLifespan ? NormalScore : RottenScore;
         }
 
         public override string ToData()
         {
-            return movesLeft > Game.ROTTEN_APPLE_LIFESPAN ? "apple" : "apple-rot";
+            return MovesLeft > RottenLifespan ? NormalData : RottenData;
         }
+    }
+
+    public class Apple(int x, int y) : Food(x, y)
+    {
+        public override int NormalScore { get; set; } = 100;
+        public override int RottenScore { get; set; } = 50;
+        public override string NormalData { get; set; } = "apple";
+        public override string RottenData { get; set; } = "apple-rot";
     }
 
     public class GoldenApple(int x, int y) : Apple(x, y)
     {
-        public override int Eat()
-        {
-            return movesLeft > Game.ROTTEN_APPLE_LIFESPAN ? Game.GOLDEN_APPLE_POINTS : Game.ROTTEN_GOLDEN_APPLE_POINTS;
-        }
+        public override int NormalScore { get; set; } = 300;
+        public override int RottenScore { get; set; } = 50;
+        public override string NormalData { get; set; } = "golden-apple";
+        public override string RottenData { get; set; } = "golden-apple-rot";
+    }
 
-        public override string ToData()
-        {
-            return movesLeft > Game.ROTTEN_APPLE_LIFESPAN ? "golden-apple" : "golden-apple-rot";
-        }
+    public class SnakeMeat(int x, int y) : Food(x, y)
+    {
+        public override int NormalScore { get; set; } = 100;
+        public override int RottenScore { get; set; } = 50;
+        public override string NormalData { get; set; } = "snake-meat";
+        public override string RottenData { get; set; } = "snake-meat-rot";
     }
 }

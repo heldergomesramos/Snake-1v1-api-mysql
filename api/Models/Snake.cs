@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace api.Models
 {
     public class Snake
@@ -83,6 +85,16 @@ namespace api.Models
         public void Freeze()
         {
             FrozenMoves = Game.FREEZE_TURNS;
+        }
+
+        public SnakeMeat CutTail()
+        {
+            SnakeMeat meat = new(Tail.X, Tail.Y);
+            var lastSegment = Segments.Last();
+            Segments.Remove(lastSegment);
+            Tail.X = lastSegment.X;
+            Tail.Y = lastSegment.Y;
+            return meat;
         }
     }
 }
