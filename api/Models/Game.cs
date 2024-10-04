@@ -4,9 +4,9 @@ namespace api.Models
 {
     public class Game
     {
-        public static readonly int SWAP_COOLDOWN = 8000;
-        public static readonly int FREEZE_COOLDOWN = 15000;
-        public static readonly int CUT_TAIL_COOLDOWN = 20000;
+        public static readonly int SWAP_COOLDOWN = 7000;
+        public static readonly int FREEZE_COOLDOWN = 12000;
+        public static readonly int CUT_TAIL_COOLDOWN = 15000;
 
         public static readonly int FREEZE_TURNS = 5;
 
