@@ -553,6 +553,9 @@ namespace api.Models
                     SpawnApple();
             }
 
+            foreach (var meat in SnakeMeats)
+                meat.MovesLeft--;
+
             SnakeMeats.RemoveAll(meat => meat.MovesLeft <= 0);
 
             if (GState == GameState.Finished)
