@@ -33,7 +33,7 @@ namespace api.Models
         public int TickInterval { get; private set; } = 0;
 
         public Dictionary<string, Snake> Snakes { get; private set; } = [];
-        public Dictionary<string, char> DirectionCommand { get; private set; } = [];
+        private Dictionary<string, Queue<char>> InputBuffer = [];
         public Apple? CurApple { get; private set; }
         public List<SnakeMeat> SnakeMeats { get; private set; } = [];
 
@@ -94,13 +94,13 @@ namespace api.Models
             {
                 var playerId = lobby.Player1.PlayerId;
                 Snakes[playerId] = new Snake(playerId, 1, Lobby.GameSettings.Height, Lobby.GameSettings.Width, this);
-                DirectionCommand[playerId] = 'r';
+                ReceiveDirectionCommand(playerId, 'r');
             }
             if (lobby.Player2 != null)
             {
                 var playerId = lobby.Player2.PlayerId;
                 Snakes[playerId] = new Snake(playerId, 2, Lobby.GameSettings.Height, Lobby.GameSettings.Width, this);
-                DirectionCommand[playerId] = 'l';
+                ReceiveDirectionCommand(playerId, 'l');
             }
 
             foreach (var sn in Snakes)
@@ -271,7 +271,7 @@ namespace api.Models
                 snake.FrozenMoves--;
                 return;
             }
-            char currentDirection = DirectionCommand[snake.PlayerId];
+            char currentDirection = ProcessDirectionCommands(snake.PlayerId);
             if (GetOppositeDirection(currentDirection.ToString()) == snake.Head.Direction)
             {
                 Console.WriteLine("Prevented self collision bug");
@@ -431,15 +431,45 @@ namespace api.Models
         {
             if (GState == GameState.Finished)
                 return;
-            //var curDirection = DirectionCommand[playerId];
+
+            if (!InputBuffer.ContainsKey(playerId))
+                InputBuffer[playerId] = new Queue<char>();
+
+            InputBuffer[playerId].Enqueue(command);
+        }
+
+        public char ProcessDirectionCommands(string playerId)
+        {
             char curDirection = Snakes[playerId].Head.Direction[0];
 
-            if ((curDirection == 'l' && command == 'r') ||
-                (curDirection == 'r' && command == 'l') ||
-                (curDirection == 'u' && command == 'd') ||
-                (curDirection == 'd' && command == 'u'))
-                return;
-            DirectionCommand[playerId] = command;
+            if (GState == GameState.Finished)
+                return curDirection;
+
+            Queue<char> buffer = InputBuffer[playerId];
+            char validCommand = curDirection;
+
+            while (buffer.Count > 0)
+            {
+                char command = buffer.Dequeue();
+
+                if (!((curDirection == 'l' && command == 'r') ||
+                      (curDirection == 'r' && command == 'l') ||
+                      (curDirection == 'u' && command == 'd') ||
+                      (curDirection == 'd' && command == 'u')))
+                {
+                    validCommand = command;
+                    break;
+                }
+            }
+
+            if (buffer.Count > 0)
+            {
+                var nextInQueue = buffer.Dequeue();
+                buffer.Clear();
+                buffer.Enqueue(nextInQueue);
+            }
+
+            return validCommand;
         }
 
         public void HandleDisconnection(string playerId)
