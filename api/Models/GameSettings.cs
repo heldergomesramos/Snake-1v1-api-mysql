@@ -40,8 +40,7 @@ namespace api.Models
                 Width = random.Next(10, 21),
                 Height = random.Next(10, 21),
                 Time = 120,
-                // Borders = random.Next(0, 2) == 1,
-                Borders = false,
+                Borders = random.Next(0, 2) == 1,
                 Abilities = true,
                 Map = random.Next(0, 2)
             };
@@ -59,7 +58,7 @@ namespace api.Models
                 gameSettings.Width = ProcessGameSetting(jsonElement, "width", gameSettings.Width, 10, 40);
                 gameSettings.Height = ProcessGameSetting(jsonElement, "height", gameSettings.Height, 10, 40);
                 gameSettings.Time = ProcessGameSetting(jsonElement, "time", gameSettings.Time, 10, 999);
-                gameSettings.Map = ProcessGameSettingLoop(jsonElement, "map", 2);
+                gameSettings.Map = ProcessGameSettingLoop(jsonElement, "map", 3);
                 gameSettings.Borders = ProcessGameBooleanSetting(jsonElement, "borders", gameSettings.Borders);
                 gameSettings.Abilities = ProcessGameBooleanSetting(jsonElement, "abilities", gameSettings.Abilities);
 
