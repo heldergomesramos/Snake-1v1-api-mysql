@@ -25,6 +25,11 @@ namespace api.Services
             _tokenService = tokenService;
         }
 
+        public async Task PingDatabaseAsync()
+        {
+            // Lightweight query to wake up the DB
+            await _userManager.Users.CountAsync();
+        }
         public async Task UpdatePlayerAsync(PlayerSimplified playerSimplified)
         {
             ArgumentNullException.ThrowIfNull(playerSimplified);
