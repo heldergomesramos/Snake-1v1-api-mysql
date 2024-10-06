@@ -67,18 +67,22 @@ namespace api.Controllers
         {
             if (dto == null)
                 return BadRequest(new { status = "error", message = "Request body cannot be null." });
+
             if (string.IsNullOrEmpty(dto.PlayerId))
                 return BadRequest(new { status = "error", message = "Player Id is required." });
+
             var player = PlayerManager.GetPlayerSimplifiedByPlayerId(dto.PlayerId);
             if (player == null)
                 return NotFound(new { status = "error", message = $"Player with id '{dto.PlayerId}' not found." });
+
             if (player.Lobby != null)
                 return Conflict(new { status = "error", message = "Player is already in a lobby." });
 
             Console.WriteLine("Join Private Lobby");
             var lobbyToReturn = await LobbyManager.JoinPrivateLobby(player, dto.LobbyCode, _hubContext);
+
             if (lobbyToReturn == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { status = "error", message = "Failed to join lobby. Please try again later." });
+                return NotFound(new { status = "error", message = "Lobby not found. Please check the lobby code." });
 
             return Ok(new
             {
