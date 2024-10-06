@@ -148,6 +148,10 @@ namespace api.Hubs
             await _playerService.UpdatePlayerAsync(player);
         }
 
+        public async Task NotifyFoodEaten(string lobbyId)
+        {
+            await Clients.Group(lobbyId).SendAsync("FoodEaten");
+        }
 
         public async Task StartGame()
         {
@@ -168,13 +172,15 @@ namespace api.Hubs
             Console.WriteLine("Send this game: " + game.GameId);
             await Clients.Group(lobby.LobbyId).SendAsync("StartGame", game.ToResponseDto());
 
-            _ = Task.Run(() => game.StartGameLoop(async (gameState) =>
+            _ = Task.Run(() => game.StartGameLoop(async (gameState, foodEaten) =>
                {
                    Console.WriteLine("Broadcast game state: " + gameState);
                    Console.WriteLine("New Time being sent: " + gameState.ToResponseDto().Time);
                    try
                    {
                        await _hubContext.Clients.Group(lobby.LobbyId).SendAsync("UpdateGameState", gameState.ToResponseDto());
+                       if (foodEaten)
+                           await _hubContext.Clients.Group(lobby.LobbyId).SendAsync("FoodEaten");
                    }
                    catch (Exception ex)
                    {

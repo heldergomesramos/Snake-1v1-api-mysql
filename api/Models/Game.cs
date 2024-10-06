@@ -31,6 +31,7 @@ namespace api.Models
         public int GameTick { get; private set; } = 0;
         public int Time { get; private set; } = 3000;
         public int TickInterval { get; private set; } = 0;
+        private bool foodEatenThisTick = false;
 
         public Dictionary<string, Snake> Snakes { get; private set; } = [];
         private Dictionary<string, Queue<char>> InputBuffer = [];
@@ -117,7 +118,8 @@ namespace api.Models
             GameTick = 0;
         }
 
-        public async Task StartGameLoop(Func<Game, Task> onTick)
+        public delegate Task GameTickHandler(Game game, bool foodEaten);
+        public async Task StartGameLoop(GameTickHandler onTick)
         {
             Console.WriteLine("Start Game Loop");
             Time = 3000;
@@ -130,7 +132,7 @@ namespace api.Models
                 Console.WriteLine("1 second passed: " + Time);
                 try
                 {
-                    await onTick(this);
+                    await onTick(this, false);
                 }
                 catch
                 {
@@ -149,7 +151,8 @@ namespace api.Models
                 Player2Cooldown -= TickInterval;
                 Console.WriteLine("\nCD: " + Player1Cooldown + "\n");
                 UpdateGameState();
-                await onTick(this);
+                await onTick(this, foodEatenThisTick);
+                foodEatenThisTick = false;
             }
             Console.WriteLine("Game has ended");
         }
@@ -388,6 +391,7 @@ namespace api.Models
                     Player1Score += food.Eat();
                 else
                     Player2Score += food.Eat();
+                foodEatenThisTick = true;
                 if (food is Apple)
                     SpawnApple();
                 else if (food is SnakeMeat meat)
