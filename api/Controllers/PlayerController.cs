@@ -61,6 +61,10 @@ namespace api.Controllers
             {
                 if (!ModelState.IsValid)
                     return BadRequest();
+                if (dto.Username.Length > 12)
+                    return StatusCode(400, new { message = "Username cannot be longer than 12 characters long." });
+                if (dto.Username.StartsWith("Guest"))
+                    return StatusCode(400, new { message = "Username cannot start with \"Guest\"." });
 
                 var user = new Player
                 {

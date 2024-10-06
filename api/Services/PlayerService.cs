@@ -116,7 +116,7 @@ namespace api.Services
 
         public PlayerRegisterResponseDto? CreateGuest()
         {
-            var guestUsername = $"Guest_{Guid.NewGuid().ToString()[..8]}";
+            var guestUsername = $"Guest_{Guid.NewGuid().ToString()[..6]}";
 
             var guestPlayer = new Player
             {
