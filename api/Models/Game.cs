@@ -95,13 +95,11 @@ namespace api.Models
             {
                 var playerId = lobby.Player1.PlayerId;
                 Snakes[playerId] = new Snake(playerId, 1, Lobby.GameSettings.Height, Lobby.GameSettings.Width, this);
-                ReceiveDirectionCommand(playerId, 'r');
             }
             if (lobby.Player2 != null)
             {
                 var playerId = lobby.Player2.PlayerId;
                 Snakes[playerId] = new Snake(playerId, 2, Lobby.GameSettings.Height, Lobby.GameSettings.Width, this);
-                ReceiveDirectionCommand(playerId, 'l');
             }
 
             foreach (var sn in Snakes)
