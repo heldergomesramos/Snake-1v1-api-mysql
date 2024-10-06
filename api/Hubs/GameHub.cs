@@ -144,7 +144,7 @@ namespace api.Hubs
             player.UpdateColor(color);
             player.UpdateAbility(ability);
 
-            await Clients.Caller.SendAsync("PlayerUpdated", player.Color, player.Ability);
+            await Clients.Caller.SendAsync("PlayerUpdated", player);
             await _playerService.UpdatePlayerAsync(player);
         }
 
