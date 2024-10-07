@@ -24,13 +24,14 @@ namespace api.Models
         public bool IsSinglePlayer { get; private set; }
 
         public string FinishedState { get; private set; } = Game.FinishedState.NotFinished.ToString();
+        public string GameState { get; private set; } = Game.GameState.Waiting.ToString();
 
         public GameData(Game game)
         {
             GameId = game.GameId;
             Lobby = LobbyMappers.ToResponseDto(game.Lobby);
             GroundLayer = game.GroundLayer;
-            EntityLayer = game.GState == GameState.Finished ? game.EntityLayerDataCopy : EntityLayerToData(game.EntityLayer);
+            EntityLayer = game.GState == Game.GameState.Finished ? game.EntityLayerDataCopy : EntityLayerToData(game.EntityLayer);
             Player1Score = game.Player1Score;
             Player2Score = game.Player2Score;
             Player1Cooldown = (int)Math.Ceiling(game.Player1Cooldown / 1000.0);
@@ -42,6 +43,7 @@ namespace api.Models
             GameTick = game.GameTick;
             Time = game.Time / 1000;
             FinishedState = game.FState.ToString();
+            GameState = game.GState.ToString();
             IsSinglePlayer = game.IsSinglePlayer;
         }
 
