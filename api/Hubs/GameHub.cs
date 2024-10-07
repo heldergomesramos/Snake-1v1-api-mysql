@@ -167,7 +167,7 @@ namespace api.Hubs
             Console.WriteLine("Send this game: " + game.GameId);
             await Clients.Group(lobby.LobbyId).SendAsync("StartGame", game.ToResponseDto());
 
-            _ = Task.Run(() => game.StartGameLoop(async (gameState, foodEaten) =>
+            _ = Task.Run(() => game.StartGameLoop(async (gameState, foodEaten, swap, freeze, cutTail) =>
                {
                    Console.WriteLine("New Tick being sent: " + gameState.ToResponseDto().GameTick);
                    try
@@ -175,6 +175,12 @@ namespace api.Hubs
                        await _hubContext.Clients.Group(lobby.LobbyId).SendAsync("UpdateGameState", gameState.ToResponseDto());
                        if (foodEaten)
                            await _hubContext.Clients.Group(lobby.LobbyId).SendAsync("FoodEaten");
+                       if (swap)
+                           await _hubContext.Clients.Group(lobby.LobbyId).SendAsync("AbilitySfx", 1);
+                       if (freeze)
+                           await _hubContext.Clients.Group(lobby.LobbyId).SendAsync("AbilitySfx", 2);
+                       if (cutTail)
+                           await _hubContext.Clients.Group(lobby.LobbyId).SendAsync("AbilitySfx", 3);
                    }
                    catch (Exception ex)
                    {
@@ -197,6 +203,7 @@ namespace api.Hubs
             var player = PlayerManager.GetPlayerSimplifiedByConnectionId(Context.ConnectionId);
             if (player == null)
                 return;
+            //Console.WriteLine("Leave game: " + player.Username + " l: " + player.Lobby.LobbyId + " g: " + player.Game.GameId);
             var game = player.Game;
             if (game == null)
             {

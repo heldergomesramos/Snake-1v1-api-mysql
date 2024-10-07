@@ -31,7 +31,12 @@ namespace api.Models
         public int GameTick { get; private set; } = 0;
         public int Time { get; private set; } = 3000;
         public int TickInterval { get; private set; } = 0;
+
+        /* Sfx Events */
         private bool foodEatenThisTick = false;
+        private bool swapThisTick = false;
+        private bool freezeThisTick = false;
+        private bool cutTailThisTick = false;
 
         public Dictionary<string, Snake> Snakes { get; private set; } = [];
         private Dictionary<string, Queue<char>> InputBuffer = [];
@@ -116,7 +121,7 @@ namespace api.Models
             GameTick = 0;
         }
 
-        public delegate Task GameTickHandler(Game game, bool foodEaten);
+        public delegate Task GameTickHandler(Game game, bool foodEaten, bool swapThisTick, bool freezeThisTick, bool cutTailThisTick);
         public async Task StartGameLoop(GameTickHandler onTick)
         {
             Console.WriteLine("Start Game Loop");
@@ -130,7 +135,7 @@ namespace api.Models
                 //Console.WriteLine("1 second passed: " + Time);
                 try
                 {
-                    await onTick(this, false);
+                    await onTick(this, false, false, false, false);
                 }
                 catch
                 {
@@ -148,8 +153,11 @@ namespace api.Models
                 Player1Cooldown -= TickInterval;
                 Player2Cooldown -= TickInterval;
                 UpdateGameState();
-                await onTick(this, foodEatenThisTick);
+                await onTick(this, foodEatenThisTick, swapThisTick, freezeThisTick, cutTailThisTick);
                 foodEatenThisTick = false;
+                swapThisTick = false;
+                freezeThisTick = false;
+                cutTailThisTick = false;
             }
             //Console.WriteLine("Game has ended");
         }
@@ -199,6 +207,7 @@ namespace api.Models
                 //Swap
                 case 0:
                     playerSnake.Swap(playerId);
+                    swapThisTick = true;
                     if (IsPlayer1(playerId))
                         Player1Cooldown = SWAP_COOLDOWN;
                     else
@@ -206,6 +215,7 @@ namespace api.Models
                     break;
                 //Freeze
                 case 1:
+                    freezeThisTick = true;
                     foreach (var snake in Snakes)
                         if (snake.Value.PlayerId != playerId)
                             snake.Value.Freeze();
@@ -218,7 +228,7 @@ namespace api.Models
                 case 2:
                     if (playerSnake.Segments.Count <= 1)
                         return;
-
+                    cutTailThisTick = true;
                     SnakeMeats.Add(playerSnake.CutTail());
                     if (IsPlayer1(playerId))
                         Player1Cooldown = CUT_TAIL_COOLDOWN;
