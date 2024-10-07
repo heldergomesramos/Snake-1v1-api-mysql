@@ -184,19 +184,8 @@ namespace api.Hubs
                }));
         }
 
-        public async Task ManualPing()
-        {
-            // Get the current time and print it to the server console
-            var now = DateTime.Now;
-            Console.WriteLine($"ManualPing received at: {now:HH:mm:ss:fff}");
-
-            // Send "ServerManualPing" back to the client
-            await Clients.Caller.SendAsync("ServerManualPing");
-        }
-
         public void UpdateDirectionCommand(char direction)
         {
-            Console.WriteLine("\nRECEIVED NEW DIRECTION COMMAND BRUH\n");
             var player = PlayerManager.GetPlayerSimplifiedByConnectionId(Context.ConnectionId);
             if (player == null || player.Game == null)
                 return;
