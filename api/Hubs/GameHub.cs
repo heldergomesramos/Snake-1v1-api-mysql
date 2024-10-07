@@ -148,11 +148,6 @@ namespace api.Hubs
             await _playerService.UpdatePlayerAsync(player);
         }
 
-        public async Task NotifyFoodEaten(string lobbyId)
-        {
-            await Clients.Group(lobbyId).SendAsync("FoodEaten");
-        }
-
         public async Task StartGame()
         {
             var player = PlayerManager.GetPlayerSimplifiedByConnectionId(Context.ConnectionId);
@@ -174,8 +169,7 @@ namespace api.Hubs
 
             _ = Task.Run(() => game.StartGameLoop(async (gameState, foodEaten) =>
                {
-                   Console.WriteLine("Broadcast game state: " + gameState);
-                   Console.WriteLine("New Time being sent: " + gameState.ToResponseDto().Time);
+                   Console.WriteLine("New Tick being sent: " + gameState.ToResponseDto().GameTick);
                    try
                    {
                        await _hubContext.Clients.Group(lobby.LobbyId).SendAsync("UpdateGameState", gameState.ToResponseDto());
@@ -190,12 +184,23 @@ namespace api.Hubs
                }));
         }
 
+        public async Task ManualPing()
+        {
+            // Get the current time and print it to the server console
+            var now = DateTime.Now;
+            Console.WriteLine($"ManualPing received at: {now:HH:mm:ss:fff}");
+
+            // Send "ServerManualPing" back to the client
+            await Clients.Caller.SendAsync("ServerManualPing");
+        }
+
         public void UpdateDirectionCommand(char direction)
         {
+            Console.WriteLine("\nRECEIVED NEW DIRECTION COMMAND BRUH\n");
             var player = PlayerManager.GetPlayerSimplifiedByConnectionId(Context.ConnectionId);
             if (player == null || player.Game == null)
                 return;
-            GameManager.UpdateDirectionCommand(player.PlayerId, player.Game.GameId, direction);
+            player.Game.ReceiveDirectionCommand(player.PlayerId, direction);
         }
 
         public async Task LeaveGame()

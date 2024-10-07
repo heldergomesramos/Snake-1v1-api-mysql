@@ -127,7 +127,7 @@ namespace api.Models
                 if (GState == GameState.Finished)
                     break;
                 Time -= 1000;
-                Console.WriteLine("1 second passed: " + Time);
+                //Console.WriteLine("1 second passed: " + Time);
                 try
                 {
                     await onTick(this, false);
@@ -147,12 +147,11 @@ namespace api.Models
                 await Task.Delay(TickInterval);
                 Player1Cooldown -= TickInterval;
                 Player2Cooldown -= TickInterval;
-                Console.WriteLine("\nCD: " + Player1Cooldown + "\n");
                 UpdateGameState();
                 await onTick(this, foodEatenThisTick);
                 foodEatenThisTick = false;
             }
-            Console.WriteLine("Game has ended");
+            //Console.WriteLine("Game has ended");
         }
 
         public static string GetOppositeDirection(string ogDirection)
@@ -188,7 +187,6 @@ namespace api.Models
             var player = GetPlayerSimplifiedByPlayerId(playerId);
             if (player == null)
                 return;
-            Console.WriteLine("Use Ability " + player.Ability + " from " + player.Username + " cd: " + (IsPlayer1(playerId) ? Player1Cooldown : Player2Cooldown));
             if ((IsPlayer1(playerId) && Player1Cooldown > 0) || Player2Cooldown > 0)
                 return;
 
@@ -272,10 +270,12 @@ namespace api.Models
                 snake.FrozenMoves--;
                 return;
             }
+            //Console.WriteLine("Before Processing: " + (InputBuffer.ContainsKey(snake.PlayerId) ? InputBuffer[snake.PlayerId].Count : "NO KEY"));
             char currentDirection = ProcessDirectionCommands(snake.PlayerId);
+            //Console.WriteLine("After Processing: " + (InputBuffer.ContainsKey(snake.PlayerId) ? InputBuffer[snake.PlayerId].Count : "NO KEY"));
             if (GetOppositeDirection(currentDirection.ToString()) == snake.Head.Direction)
             {
-                Console.WriteLine("Prevented self collision bug");
+                //Console.WriteLine("Prevented self collision bug");
                 currentDirection = snake.Head.Direction[0];
             }
 
@@ -422,7 +422,6 @@ namespace api.Models
 
         private void AddSnakeToEntityLayer(Snake snake)
         {
-            Console.WriteLine("Add Snake to Entity Layer");
             EntityLayer[snake.Head.Y][snake.Head.X] = snake.Head;
             foreach (IEntity segment in snake.Segments)
                 EntityLayer[segment.Y][segment.X] = segment;
@@ -437,6 +436,7 @@ namespace api.Models
             if (!InputBuffer.ContainsKey(playerId))
                 InputBuffer[playerId] = new Queue<char>();
 
+            //Console.WriteLine("Receive direction command: " + command);
             InputBuffer[playerId].Enqueue(command);
         }
 
@@ -447,7 +447,12 @@ namespace api.Models
             if (GState == GameState.Finished)
                 return curDirection;
 
-            Queue<char> buffer = InputBuffer[playerId];
+            if (!InputBuffer.TryGetValue(playerId, out Queue<char>? value))
+            {
+                InputBuffer[playerId] = new Queue<char>();
+                return curDirection;
+            }
+            Queue<char> buffer = value;
             char validCommand = curDirection;
 
             while (buffer.Count > 0)
@@ -469,8 +474,10 @@ namespace api.Models
                 var nextInQueue = buffer.Dequeue();
                 buffer.Clear();
                 buffer.Enqueue(nextInQueue);
+                //Console.WriteLine(" Store: " + nextInQueue);
             }
-
+            //Console.WriteLine("Use: " + validCommand);
+            //Console.WriteLine("How the buffer is at the end: " + buffer.Count);
             return validCommand;
         }
 
@@ -601,7 +608,6 @@ namespace api.Models
 
         private void UpdateEntityLayer()
         {
-            Console.WriteLine("Update Entity Layer");
             if (EntityLayer == null || EntityLayer[0] == null)
                 return;
 
