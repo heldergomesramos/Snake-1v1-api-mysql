@@ -215,6 +215,7 @@ namespace api.Models
                 //Swap
                 case 0:
                     playerSnake.Swap(playerId);
+                    InputBuffer[playerId] = new Queue<char>();
                     swapThisTick = true;
                     if (IsPlayer1(playerId))
                         Player1Cooldown = SWAP_COOLDOWN;
@@ -288,9 +289,8 @@ namespace api.Models
                 snake.FrozenMoves--;
                 return;
             }
-            //Console.WriteLine("Before Processing: " + (InputBuffer.ContainsKey(snake.PlayerId) ? InputBuffer[snake.PlayerId].Count : "NO KEY"));
+
             char currentDirection = ProcessDirectionCommands(snake.PlayerId);
-            //Console.WriteLine("After Processing: " + (InputBuffer.ContainsKey(snake.PlayerId) ? InputBuffer[snake.PlayerId].Count : "NO KEY"));
             if (GetOppositeDirection(currentDirection.ToString()) == snake.Head.Direction)
             {
                 //Console.WriteLine("Prevented self collision bug");

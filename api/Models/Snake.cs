@@ -78,7 +78,6 @@ namespace api.Models
                     Segments.AddLast(segment);
             }
 
-            Game.ReceiveDirectionCommand(playerId, Head.Direction[0]);
             HasSwapped = true;
         }
 
