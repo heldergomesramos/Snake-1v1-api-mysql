@@ -9,10 +9,13 @@ namespace api.Models
         public static readonly int CUT_TAIL_COOLDOWN = 15000;
 
         public static readonly int FREEZE_TURNS = 5;
+        public static readonly int QUICK_SAND_STUN_TURNS = 1;
 
         public static readonly int GOLDEN_APPLE_CHANCE = 10; /* Chance = 1 / GOLDEN_APPLE_CHANCE (1 / 10 = 0.1) */
 
         public static readonly int LAVA_POOL_DIVISOR = 25; /* N Pools = Size / LAVA_POOL_DIVISOR (100 / 25 = 4) */
+        public static readonly int QUICK_SAND_DIVISOR = 60; /* N Pools = Size / QUICK_SAND_DIVISOR (100 / 60 = 1) */
+        public static readonly int CACTUS_DIVISOR = 15; /* N Cactus = Size / CACTUS_DIVISOR (100 / 15 = 6) */
 
         private static readonly int tileVariations = 16;
         public string GameId { get; private set; } = string.Empty;
@@ -25,6 +28,7 @@ namespace api.Models
 
         public int[][] GroundLayer { get; private set; }
         public IEntity?[][] EntityLayer { get; private set; }
+        public IEntity?[][] SpecialGroundLayer { get; private set; }
 
         /* This should be in a separate ingame player class but oh well */
         public int Player1Score { get; private set; } = 0;
@@ -48,7 +52,7 @@ namespace api.Models
         private Dictionary<string, Queue<char>> InputBuffer = [];
         public Apple? CurApple { get; private set; }
         public List<SnakeMeat> SnakeMeats { get; private set; } = [];
-        public List<Obstacle> Obstacles { get; private set; } = [];
+        public List<IEntity> Hazards { get; private set; } = [];
 
         public string[][] EntityLayerDataCopy { get; private set; }
 
@@ -101,6 +105,10 @@ namespace api.Models
             for (int i = 0; i < height; i++)
                 EntityLayer[i] = new IEntity[width];
 
+            SpecialGroundLayer = new IEntity[height][];
+            for (int i = 0; i < height; i++)
+                SpecialGroundLayer[i] = new IEntity[width];
+
             if (lobby.Player1 != null)
             {
                 var playerId = lobby.Player1.PlayerId;
@@ -115,7 +123,12 @@ namespace api.Models
             foreach (var sn in Snakes)
                 AddSnakeToEntityLayer(sn.Value);
 
-            if (Map == 2)
+            if (Map == 1)
+            {
+                GenerateQuicksandPools();
+                GenerateCactus();
+            }
+            else if (Map == 2)
                 GenerateLavaPools();
 
             SpawnApple();
@@ -289,6 +302,12 @@ namespace api.Models
                 snake.FrozenMoves--;
                 return;
             }
+            else if (snake.QuicksandMoves > 0)
+            {
+                Console.WriteLine("Stuned for: " + snake.QuicksandMoves);
+                snake.QuicksandMoves--;
+                return;
+            }
 
             char currentDirection = ProcessDirectionCommands(snake.PlayerId);
             if (GetOppositeDirection(currentDirection.ToString()) == snake.Head.Direction)
@@ -436,6 +455,8 @@ namespace api.Models
                 snake.Tail.Y = prevLastSegmentY;
                 snake.Tail.Direction = Snake.GetTailDirection(prevLastSegmentDirection, snake.Tail.Direction);
             }
+            if (SpecialGroundLayer[snake.Head.Y][snake.Head.X] is QuicksandPool)
+                snake.QuicksandMoves = QUICK_SAND_STUN_TURNS;
         }
 
         private void AddSnakeToEntityLayer(Snake snake)
@@ -639,8 +660,8 @@ namespace api.Models
             foreach (var meat in SnakeMeats)
                 EntityLayer[meat.Y][meat.X] = meat;
 
-            foreach (var obs in Obstacles)
-                EntityLayer[obs.Y][obs.X] = obs;
+            foreach (var haz in Hazards)
+                EntityLayer[haz.Y][haz.X] = haz;
 
             if (CurApple != null)
                 EntityLayer[CurApple.Y][CurApple.X] = CurApple;
@@ -669,7 +690,7 @@ namespace api.Models
             if (snake.Head.X == snake.Tail.X && snake.Head.Y == snake.Tail.Y)
                 snake.HasCollided = true;
 
-            if (EntityLayer[snake.Head.Y][snake.Head.X] is Obstacle)
+            if (EntityLayer[snake.Head.Y][snake.Head.X] is IObstacle)
                 snake.HasCollided = true;
 
             if (snake.HasCollided)
@@ -688,7 +709,7 @@ namespace api.Models
                 if (snake.HasCollided)
                     continue;
 
-                if (EntityLayer[snake.Head.Y][snake.Head.X] is Obstacle)
+                if (EntityLayer[snake.Head.Y][snake.Head.X] is IObstacle)
                 {
                     snake.HasCollided = true;
                     continue;
@@ -730,7 +751,36 @@ namespace api.Models
             return newData;
         }
 
-        /* Lava Pools */
+        /* Hazards */
+
+        public void GenerateCactus()
+        {
+            Random rand = new();
+
+            int baseNumberOfCactus = Width * Height / CACTUS_DIVISOR;
+            int adjustment = rand.Next(0, 5) - 2;
+            int numberOfCactus = baseNumberOfCactus + adjustment;
+
+            for (int i = 0; i < numberOfCactus; i++)
+            {
+                bool isPlaced = false;
+
+                while (!isPlaced)
+                {
+                    int startX = rand.Next(0, Width);
+                    int startY = rand.Next(0, Height);
+                    int cactusVariant = rand.Next(0, 3);
+
+                    if (EntityLayer[startY][startX] == null && SpecialGroundLayer[startY][startX] == null)
+                    {
+                        var cactus = new Cactus(startX, startY, cactusVariant);
+                        EntityLayer[startY][startX] = cactus;
+                        Hazards.Add(cactus);
+                        isPlaced = true;
+                    }
+                }
+            }
+        }
 
         public void GenerateLavaPools()
         {
@@ -752,9 +802,38 @@ namespace api.Models
 
                     List<(int x, int y)> poolCoords = GetLavaPoolCoordinates(startX, startY, poolType);
 
-                    if (CanPlaceLavaPool(poolCoords))
+                    if (CanPlacePool(poolCoords))
                     {
                         PlaceLavaPool(poolCoords, poolType);
+                        isPlaced = true;
+                    }
+                }
+            }
+        }
+
+        public void GenerateQuicksandPools()
+        {
+            Random rand = new();
+
+            int baseNumberOfPools = Width * Height / QUICK_SAND_DIVISOR;
+            int adjustment = rand.Next(0, 3) - 1;
+            int numberOfPools = baseNumberOfPools + adjustment;
+
+            for (int i = 0; i < numberOfPools; i++)
+            {
+                bool isPlaced = false;
+
+                while (!isPlaced)
+                {
+                    int startX = rand.Next(0, Width);
+                    int startY = rand.Next(0, Height);
+                    int poolType = rand.Next(0, 2); // 0 for vertical, 1 for horizontal
+
+                    List<(int x, int y)> poolCoords = GetQuicksandPoolCoordinates(startX, startY, poolType);
+
+                    if (CanPlacePool(poolCoords))
+                    {
+                        PlaceQuicksandPool(poolCoords, poolType);
                         isPlaced = true;
                     }
                 }
@@ -773,13 +852,23 @@ namespace api.Models
             };
         }
 
-        private bool CanPlaceLavaPool(List<(int x, int y)> poolCoords)
+        private static List<(int x, int y)> GetQuicksandPoolCoordinates(int startX, int startY, int poolType)
+        {
+            return poolType switch
+            {
+                0 => [(startX, startY), (startX + 1, startY), (startX, startY + 1), (startX + 1, startY + 1),
+              (startX, startY + 2), (startX + 1, startY + 2), (startX, startY + 3), (startX + 1, startY + 3)], // Vertical 4x2
+                1 => [(startX, startY), (startX + 1, startY), (startX + 2, startY), (startX + 3, startY),
+              (startX, startY + 1), (startX + 1, startY + 1), (startX + 2, startY + 1), (startX + 3, startY + 1)], // Horizontal 2x4
+                _ => []
+            };
+        }
+
+        private bool CanPlacePool(List<(int x, int y)> poolCoords)
         {
             foreach (var (x, y) in poolCoords)
-            {
-                if (x < 0 || y < 0 || x >= Width || y >= Height || EntityLayer[y][x] != null)
+                if (x < 0 || y < 0 || x >= Width || y >= Height || EntityLayer[y][x] != null || SpecialGroundLayer[y][x] != null)
                     return false;
-            }
             return true;
         }
 
@@ -789,8 +878,18 @@ namespace api.Models
             {
                 var (x, y) = poolCoords[i];
                 var pool = new LavaPool(x, y, poolType, i);
-                Obstacles.Add(pool);
+                Hazards.Add(pool);
                 EntityLayer[y][x] = pool;
+            }
+        }
+
+        private void PlaceQuicksandPool(List<(int x, int y)> poolCoords, int poolType)
+        {
+            for (int i = 0; i < poolCoords.Count; i++)
+            {
+                var (x, y) = poolCoords[i];
+                var pool = new QuicksandPool(x, y, poolType, i);
+                SpecialGroundLayer[y][x] = pool;
             }
         }
     }

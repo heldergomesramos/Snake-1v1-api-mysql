@@ -11,6 +11,7 @@ namespace api.Models
 
         public int[][] GroundLayer { get; private set; }
         public string[][] EntityLayer { get; private set; }
+        public string[][] SpecialGroundLayer { get; private set; }
 
         public int Player1Score { get; private set; } = 0;
         public int Player2Score { get; private set; } = 0;
@@ -32,6 +33,7 @@ namespace api.Models
             Lobby = LobbyMappers.ToResponseDto(game.Lobby);
             GroundLayer = game.GroundLayer;
             EntityLayer = game.GState == Game.GameState.Finished ? game.EntityLayerDataCopy : EntityLayerToData(game.EntityLayer);
+            SpecialGroundLayer = EntityLayerToData(game.SpecialGroundLayer);
             Player1Score = game.Player1Score;
             Player2Score = game.Player2Score;
             Player1Cooldown = (int)Math.Ceiling(game.Player1Cooldown / 1000.0);

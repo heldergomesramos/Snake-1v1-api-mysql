@@ -7,6 +7,8 @@ namespace api.Models
         public abstract string ToData();
     }
 
+    public interface IObstacle { };
+
     public class SnakeSegment(int x, int y, string direction, string type, int playerNumber) : IEntity(x, y)
     {
         public int PlayerNumber { get; set; } = playerNumber;
@@ -68,18 +70,23 @@ namespace api.Models
         public override string RottenData { get; set; } = "snake-meat-rot";
     }
 
-    public abstract class Obstacle(int x, int y) : IEntity(x, y) { }
-
-    public class LavaPool : Obstacle
+    public abstract class Pool : IEntity
     {
         public int PoolType { get; set; }
         public int SegmentIndex { get; set; }
 
-        public LavaPool(int x, int y, int poolType, int segmentIndex) : base(x, y)
+        protected Pool(int x, int y, int poolType, int segmentIndex) : base(x, y)
         {
             PoolType = poolType;
             SegmentIndex = segmentIndex;
         }
+
+        public abstract override string ToData();
+    }
+
+    public class LavaPool : Pool, IObstacle
+    {
+        public LavaPool(int x, int y, int poolType, int segmentIndex) : base(x, y, poolType, segmentIndex) { }
 
         public override string ToData()
         {
@@ -94,4 +101,33 @@ namespace api.Models
         }
     }
 
+    public class QuicksandPool : Pool
+    {
+        public QuicksandPool(int x, int y, int poolType, int segmentIndex) : base(x, y, poolType, segmentIndex) { }
+
+        public override string ToData()
+        {
+            return PoolType switch
+            {
+                0 => $"quicksand-vertical-{SegmentIndex}",
+                1 => $"quicksand-horizontal-{SegmentIndex}",
+                _ => "unknown",
+            };
+        }
+    }
+
+    public class Cactus : IEntity, IObstacle
+    {
+        public int CactusVariant { get; set; }
+
+        public Cactus(int x, int y, int cactusVariant) : base(x, y)
+        {
+            CactusVariant = cactusVariant;
+        }
+
+        public override string ToData()
+        {
+            return $"cactus-{CactusVariant}";
+        }
+    }
 }

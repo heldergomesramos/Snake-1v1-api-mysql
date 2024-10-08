@@ -41,19 +41,23 @@ namespace api.Controllers
         public async Task<IActionResult> CreatePrivateLobby([FromBody] PlayerIdDto dto)
         {
             if (dto == null)
-                return BadRequest(new { status = "error", message = "Request body cannot be null." });
+                return BadRequest(new { message = "Request body cannot be null." });
+
             if (string.IsNullOrEmpty(dto.PlayerId))
-                return BadRequest(new { status = "error", message = "Player Id is required." });
+                return BadRequest(new { message = "Player Id is required." });
+
             var player = PlayerManager.GetPlayerSimplifiedByPlayerId(dto.PlayerId);
             if (player == null)
-                return NotFound(new { status = "error", message = $"Player with id '{dto.PlayerId}' not found." });
-            if (player.Lobby != null)
-                return Conflict(new { status = "error", message = "Player is already in a lobby." });
+                return NotFound(new { message = $"Player with id '{dto.PlayerId}' not found." });
 
-            Console.WriteLine("\nCreate Private Lobby from: " + player.Username);
+            if (player.Lobby != null)
+                return Conflict(new { message = "Player is already in a lobby." });
+
+            Console.WriteLine("\nCreate Private Lobby for: " + player.Username);
             var lobbyToReturn = await LobbyManager.CreatePrivateLobby(player, _hubContext);
             if (lobbyToReturn == null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { status = "error", message = "Failed to create lobby. Please try again later." });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Failed to create lobby. Please try again later." });
+
             Console.WriteLine("Success at creating private lobby");
             return Ok(new
             {
@@ -61,6 +65,7 @@ namespace api.Controllers
                 lobby = lobbyToReturn
             });
         }
+
 
         [HttpPost("join-private-lobby")]
         public async Task<IActionResult> JoinPrivateLobby([FromBody] JoinPrivateLobbyRequestDto dto)

@@ -12,6 +12,7 @@ namespace api.Models
         public bool HasCollided { get; set; } = false;
         public bool HasSwapped { get; set; } = false;
         public int FrozenMoves { get; set; } = 0;
+        public int QuicksandMoves { get; set; } = 0;
         public Game Game { get; set; }
 
         public Snake(string playerId, int playerNumber, int gameHeight, int gameWidth, Game game)
