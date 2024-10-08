@@ -115,7 +115,7 @@ namespace api.Models
             foreach (var sn in Snakes)
                 AddSnakeToEntityLayer(sn.Value);
 
-            if (Map == 3)
+            if (Map == 2)
                 GenerateLavaPools();
 
             SpawnApple();
