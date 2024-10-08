@@ -777,7 +777,7 @@ namespace api.Models
         {
             foreach (var (x, y) in poolCoords)
             {
-                if (x < 0 || y < 0 || x >= Width || y >= Height || EntityLayer[x][y] != null)
+                if (x < 0 || y < 0 || x >= Width || y >= Height || EntityLayer[y][x] != null)
                     return false;
             }
             return true;
