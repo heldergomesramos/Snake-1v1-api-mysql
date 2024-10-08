@@ -67,4 +67,31 @@ namespace api.Models
         public override string NormalData { get; set; } = "snake-meat";
         public override string RottenData { get; set; } = "snake-meat-rot";
     }
+
+    public abstract class Obstacle(int x, int y) : IEntity(x, y) { }
+
+    public class LavaPool : Obstacle
+    {
+        public int PoolType { get; set; }
+        public int SegmentIndex { get; set; }
+
+        public LavaPool(int x, int y, int poolType, int segmentIndex) : base(x, y)
+        {
+            PoolType = poolType;
+            SegmentIndex = segmentIndex;
+        }
+
+        public override string ToData()
+        {
+            return PoolType switch
+            {
+                0 => $"lava-vertical-{SegmentIndex}",
+                1 => $"lava-horizontal-{SegmentIndex}",
+                2 => $"lava-circle-large-{SegmentIndex}",
+                3 => "lava-circle-small",
+                _ => "unknown",
+            };
+        }
+    }
+
 }

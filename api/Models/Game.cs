@@ -10,12 +10,18 @@ namespace api.Models
 
         public static readonly int FREEZE_TURNS = 5;
 
-        public static readonly int GOLDEN_APPLE_CHANCE = 10; /* Chance = 1 / GOLDEN_APPLE_CHANCE */
+        public static readonly int GOLDEN_APPLE_CHANCE = 10; /* Chance = 1 / GOLDEN_APPLE_CHANCE (1 / 10 = 0.1) */
+
+        public static readonly int LAVA_POOL_DIVISOR = 25; /* N Pools = Size / LAVA_POOL_DIVISOR (100 / 25 = 4) */
 
         private static readonly int tileVariations = 16;
         public string GameId { get; private set; } = string.Empty;
         public GenericLobby Lobby { get; private set; }
         public bool IsSinglePlayer { get; private set; } = false;
+
+        public int Width { get { return Lobby?.GameSettings?.Width ?? 0; } }
+        public int Height { get { return Lobby?.GameSettings?.Height ?? 0; } }
+        public int Map { get { return Lobby?.GameSettings?.Map ?? 0; } }
 
         public int[][] GroundLayer { get; private set; }
         public IEntity?[][] EntityLayer { get; private set; }
@@ -42,6 +48,7 @@ namespace api.Models
         private Dictionary<string, Queue<char>> InputBuffer = [];
         public Apple? CurApple { get; private set; }
         public List<SnakeMeat> SnakeMeats { get; private set; } = [];
+        public List<Obstacle> Obstacles { get; private set; } = [];
 
         public string[][] EntityLayerDataCopy { get; private set; }
 
@@ -79,7 +86,7 @@ namespace api.Models
             Lobby = lobby;
             IsSinglePlayer = Lobby.Player1 == null || Lobby.Player2 == null;
             var height = Lobby.GameSettings.Height;
-            var width = Lobby.GameSettings.Width;
+            var width = Width;
             TickInterval = 1000 / Lobby.GameSettings.Speed;
 
             GroundLayer = new int[height][];
@@ -94,8 +101,6 @@ namespace api.Models
             for (int i = 0; i < height; i++)
                 EntityLayer[i] = new IEntity[width];
 
-
-
             if (lobby.Player1 != null)
             {
                 var playerId = lobby.Player1.PlayerId;
@@ -109,6 +114,9 @@ namespace api.Models
 
             foreach (var sn in Snakes)
                 AddSnakeToEntityLayer(sn.Value);
+
+            if (Map == 3)
+                GenerateLavaPools();
 
             SpawnApple();
 
@@ -631,6 +639,9 @@ namespace api.Models
             foreach (var meat in SnakeMeats)
                 EntityLayer[meat.Y][meat.X] = meat;
 
+            foreach (var obs in Obstacles)
+                EntityLayer[obs.Y][obs.X] = obs;
+
             if (CurApple != null)
                 EntityLayer[CurApple.Y][CurApple.X] = CurApple;
         }
@@ -658,6 +669,9 @@ namespace api.Models
             if (snake.Head.X == snake.Tail.X && snake.Head.Y == snake.Tail.Y)
                 snake.HasCollided = true;
 
+            if (EntityLayer[snake.Head.Y][snake.Head.X] is Obstacle)
+                snake.HasCollided = true;
+
             if (snake.HasCollided)
                 EndGame(FinishedState.SinglePlayerCollision);
         }
@@ -667,25 +681,32 @@ namespace api.Models
             if (IsSinglePlayer)
                 return;
 
-            foreach (var snakeHeadEntry in Snakes)
+            foreach (var snakeEntry in Snakes)
             {
+                var snake = snakeEntry.Value;
                 /* If border collision has been marked previously on MoveSnake() */
-                if (snakeHeadEntry.Value.HasCollided)
+                if (snake.HasCollided)
                     continue;
 
-                var snakeHead = snakeHeadEntry.Value.Head;
+                if (EntityLayer[snake.Head.Y][snake.Head.X] is Obstacle)
+                {
+                    snake.HasCollided = true;
+                    continue;
+                }
+
+                var snakeHead = snake.Head;
                 foreach (var snakeBodyEntry in Snakes)
                 {
                     var snakeBody = snakeBodyEntry.Value.Segments;
                     foreach (var segment in snakeBody)
                         if (snakeHead.X == segment.X && snakeHead.Y == segment.Y)
                         {
-                            snakeHeadEntry.Value.HasCollided = true;
+                            snake.HasCollided = true;
                             break;
                         }
                     var snakeTail = snakeBodyEntry.Value.Tail;
                     if (snakeHead.X == snakeTail.X && snakeHead.Y == snakeTail.Y)
-                        snakeHeadEntry.Value.HasCollided = true;
+                        snake.HasCollided = true;
                 }
             }
 
@@ -707,6 +728,70 @@ namespace api.Models
             var newData = new GameData(this);
             EntityLayerDataCopy = newData.EntityLayer;
             return newData;
+        }
+
+        /* Lava Pools */
+
+        public void GenerateLavaPools()
+        {
+            Random rand = new();
+
+            int baseNumberOfPools = Width * Height / LAVA_POOL_DIVISOR;
+            int adjustment = rand.Next(0, 3) - 1; // Generates -1, 0, or +1
+            int numberOfPools = baseNumberOfPools + adjustment;
+
+            for (int i = 0; i < numberOfPools; i++)
+            {
+                bool isPlaced = false;
+
+                while (!isPlaced)
+                {
+                    int startX = rand.Next(0, Width);
+                    int startY = rand.Next(0, Height);
+                    int poolType = rand.Next(0, 4);
+
+                    List<(int x, int y)> poolCoords = GetLavaPoolCoordinates(startX, startY, poolType);
+
+                    if (CanPlaceLavaPool(poolCoords))
+                    {
+                        PlaceLavaPool(poolCoords, poolType);
+                        isPlaced = true;
+                    }
+                }
+            }
+        }
+
+        private static List<(int x, int y)> GetLavaPoolCoordinates(int startX, int startY, int poolType)
+        {
+            return poolType switch
+            {
+                0 => [(startX, startY), (startX, startY + 1), (startX, startY + 2), (startX, startY + 3)],
+                1 => [(startX, startY), (startX + 1, startY), (startX + 2, startY)],
+                2 => [(startX, startY), (startX + 1, startY), (startX, startY + 1), (startX + 1, startY + 1)],
+                3 => [(startX, startY)],
+                _ => [],
+            };
+        }
+
+        private bool CanPlaceLavaPool(List<(int x, int y)> poolCoords)
+        {
+            foreach (var (x, y) in poolCoords)
+            {
+                if (x < 0 || y < 0 || x >= Width || y >= Height || EntityLayer[x][y] != null)
+                    return false;
+            }
+            return true;
+        }
+
+        private void PlaceLavaPool(List<(int x, int y)> poolCoords, int poolType)
+        {
+            for (int i = 0; i < poolCoords.Count; i++)
+            {
+                var (x, y) = poolCoords[i];
+                var pool = new LavaPool(x, y, poolType, i);
+                Obstacles.Add(pool);
+                EntityLayer[y][x] = pool;
+            }
         }
     }
 }
