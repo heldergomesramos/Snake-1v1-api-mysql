@@ -17,7 +17,6 @@ builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var mySqlConnectionString = builder.Configuration.GetConnectionString("AZURE_MYSQL_CONNECTIONSTRING") ?? builder.Configuration.GetConnectionString("DefaultConnection");
-//var mySqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
@@ -37,8 +36,7 @@ builder.Services.AddIdentity<Player, IdentityRole>(options =>
 // builder.Services.AddAuthentication().AddJwtBearer(options =>
 // {
 //     var x = builder.Configuration["JWT:SigningKey"];
-//     if (x == null)
-//         x = "A"; /* Only here because null warning */
+//     x ??= "A"; /* Only here because null warning */
 //     options.TokenValidationParameters = new TokenValidationParameters
 //     {
 //         ValidateIssuer = true,
@@ -50,25 +48,24 @@ builder.Services.AddIdentity<Player, IdentityRole>(options =>
 //     };
 // });
 
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("AllowSpecificOrigin",
-//         builder => builder.WithOrigins("https://heldergomesramos.github.io")
-//                           .AllowAnyMethod()
-//                           .AllowAnyHeader()
-//                           .AllowCredentials());
-// });
-
 builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowAll", builder =>
-        {
-            builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
-    });
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("https://heldergomesramos.github.io")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
+
+// builder.Services.AddCors(options =>
+//     {
+//         options.AddPolicy("AllowAll", builder =>
+//         {
+//             builder
+//                 .AllowAnyOrigin()
+//                 .AllowAnyMethod()
+//                 .AllowAnyHeader();
+//         });
+//     });
 
 builder.Services.AddSignalR(o =>
 {
@@ -100,8 +97,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseCors("AllowSpecificOrigin");
-app.UseCors("AllowAll");
+app.UseCors("AllowSpecificOrigin");
+//app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 // app.UseAuthentication();
