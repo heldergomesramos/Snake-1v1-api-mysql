@@ -55,8 +55,8 @@ namespace api.Models
             {
                 var gameSettings = new GameSettings();
                 gameSettings.Speed = ProcessGameSetting(jsonElement, "speed", gameSettings.Speed, 1, 10);
-                gameSettings.Width = ProcessGameSetting(jsonElement, "width", gameSettings.Width, 8, 40);
-                gameSettings.Height = ProcessGameSetting(jsonElement, "height", gameSettings.Height, 2, 40);
+                gameSettings.Width = ProcessGameSetting(jsonElement, "width", gameSettings.Width, 10, 40);
+                gameSettings.Height = ProcessGameSetting(jsonElement, "height", gameSettings.Height, 10, 40);
                 gameSettings.Time = ProcessGameSetting(jsonElement, "time", gameSettings.Time, 10, 999);
                 gameSettings.Map = ProcessGameSettingLoop(jsonElement, "map", 3);
                 gameSettings.Borders = ProcessGameBooleanSetting(jsonElement, "borders", gameSettings.Borders);
