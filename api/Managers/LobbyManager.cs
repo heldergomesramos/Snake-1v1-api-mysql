@@ -4,13 +4,11 @@ using api.Hubs;
 using api.Mappers;
 using api.Models;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.VisualBasic;
 
-namespace api.Singletons
+namespace api.Managers
 {
     public class LobbyManager
     {
-        private static readonly object _lock = new();
         public static PlayerSimplified? PlayerInPublicQueue = null;
         private static readonly List<GenericLobby> _privateLobbies = [];
         private static readonly List<GenericLobby> _publicLobbies = [];

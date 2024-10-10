@@ -2,6 +2,7 @@ using api.Models;
 
 namespace api.Dtos.Player
 {
+    /* Used only here in the api. Used to manage connections and store temporary data */
     public class PlayerSimplified
     {
         public string PlayerId { get; set; } = string.Empty;

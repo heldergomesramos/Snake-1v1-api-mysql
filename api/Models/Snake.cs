@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace api.Models
 {
     public class Snake
@@ -20,36 +18,35 @@ namespace api.Models
             Game = game;
             PlayerId = playerId;
             PlayerNumber = playerNumber;
-            int y; // Vertical position (row)
-            int tailX, bodyX, headX; // Horizontal positions (columns)
-                                     // Determine the vertical position based on the board height (center-ish)
+            int y;
+            int tailX, bodyX, headX;
+
             if (gameHeight % 2 == 0)
             {
-                // If the board height is even, snake 1 is at index 4, snake 2 at index 5
+                // If the board height is even, snakes are 1 vertical tile apart
                 y = playerNumber == 1 ? (gameHeight / 2) - 1 : (gameHeight / 2);
             }
             else
             {
-                // If the board height is odd, snake 1 is at index 4, snake 2 at index 6
+                // If the board height is odd, snakes are 2 vertical tiles apart
                 y = playerNumber == 1 ? (gameHeight / 2) - 1 : (gameHeight / 2) + 1;
             }
 
             if (playerNumber == 1)
             {
                 // Snake 1 faces right
-                tailX = 1; // Tail near the left edge
+                tailX = 1;
                 bodyX = 2;
-                headX = 3; // Head points towards the right
+                headX = 3;
             }
             else
             {
                 // Snake 2 faces left
-                tailX = gameWidth - 2; // Tail near the right edge
+                tailX = gameWidth - 2;
                 bodyX = gameWidth - 3;
-                headX = gameWidth - 4; // Head points towards the left
+                headX = gameWidth - 4;
             }
 
-            // Create the segments for the snake
             Tail = new SnakeSegment(tailX, y, playerNumber == 1 ? "r" : "l", "tail", playerNumber);
             var body = new SnakeSegment(bodyX, y, "h", "body", playerNumber);
             Head = new SnakeSegment(headX, y, playerNumber == 1 ? "r" : "l", "head", playerNumber);

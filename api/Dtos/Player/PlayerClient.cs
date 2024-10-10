@@ -1,5 +1,6 @@
 namespace api.Dtos.Player
 {
+    /* Frontend client receives this data */
     public class PlayerClient
     {
         public string PlayerId { get; set; } = string.Empty;

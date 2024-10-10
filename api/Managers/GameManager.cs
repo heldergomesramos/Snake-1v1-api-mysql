@@ -1,6 +1,6 @@
 using api.Models;
 
-namespace api.Singletons
+namespace api.Managers
 {
     public class GameManager
     {

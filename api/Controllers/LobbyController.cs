@@ -1,8 +1,8 @@
 using api.Dtos.Lobby;
 using api.Dtos.Player;
 using api.Hubs;
-using api.Mappers;
-using api.Singletons;
+using api.Managers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -10,33 +10,31 @@ namespace api.Controllers
 {
     [Route("api/lobby")]
     [ApiController]
-    public class LobbyController : ControllerBase
+    public class LobbyController(IHubContext<GameHub> hubContext) : ControllerBase
     {
-        private readonly ILogger<LobbyController> _logger;
-        private readonly IHubContext<GameHub> _hubContext;
+        private readonly IHubContext<GameHub> _hubContext = hubContext;
 
-        public LobbyController(ILogger<LobbyController> logger, IHubContext<GameHub> hubContext)
-        {
-            _logger = logger;
-            _hubContext = hubContext;
-        }
+        /* Commented Methods are the ones not used in practice */
 
-        [HttpGet("all-private")]
-        public IActionResult GetAllPrivateLobbies()
-        {
-            var lobbies = LobbyManager.GetAllPrivateLobbies();
-            return Ok(lobbies);
-        }
+        // [Authorize]
+        // [HttpGet("all-private")]
+        // public IActionResult GetAllPrivateLobbies()
+        // {
+        //     var lobbies = LobbyManager.GetAllPrivateLobbies();
+        //     return Ok(lobbies);
+        // }
 
-        [HttpGet("details/{id}")]
-        public IActionResult GetById([FromRoute] string id)
-        {
-            var lobby = LobbyManager.GetPrivateLobbyById(id);
-            if (lobby == null)
-                return NotFound();
-            return Ok(new { lobby = LobbyMappers.ToResponseDto(lobby) });
-        }
+        // [Authorize]
+        // [HttpGet("details/{id}")]
+        // public IActionResult GetById([FromRoute] string id)
+        // {
+        //     var lobby = LobbyManager.GetPrivateLobbyById(id);
+        //     if (lobby == null)
+        //         return NotFound();
+        //     return Ok(new { lobby = LobbyMappers.ToResponseDto(lobby) });
+        // }
 
+        [Authorize]
         [HttpPost("create-private-lobby")]
         public async Task<IActionResult> CreatePrivateLobby([FromBody] PlayerIdDto dto)
         {
@@ -66,7 +64,7 @@ namespace api.Controllers
             });
         }
 
-
+        [Authorize]
         [HttpPost("join-private-lobby")]
         public async Task<IActionResult> JoinPrivateLobby([FromBody] JoinPrivateLobbyRequestDto dto)
         {
@@ -96,6 +94,7 @@ namespace api.Controllers
             });
         }
 
+        [Authorize]
         [HttpPost("leave-private-lobby")]
         public async Task<IActionResult> LeavePrivateLobby([FromBody] PlayerIdDto dto)
         {
@@ -121,12 +120,12 @@ namespace api.Controllers
             });
         }
 
-        [HttpDelete("all")]
-        public IActionResult DeleteAllLobbies()
-        {
-            _logger.LogWarning("DeleteAllLobbies() executed");
-            LobbyManager.DeleteAllLobbies();
-            return NoContent();
-        }
+        // [HttpDelete("all")]
+        // public IActionResult DeleteAllLobbies()
+        // {
+        //     _logger.LogWarning("DeleteAllLobbies() executed");
+        //     LobbyManager.DeleteAllLobbies();
+        //     return NoContent();
+        // }
     }
 }

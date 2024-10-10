@@ -1,57 +1,43 @@
 using api.Dtos.Player;
-using api.Mappers;
-using api.Models;
 using api.Services;
-using api.Singletons;
-using Microsoft.AspNetCore.Identity;
+using api.Managers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
     [Route("api/player")]
     [ApiController]
-    public class PlayerController : ControllerBase
+    public class PlayerController(IPlayerService playerService, ILogger<PlayerController> logger) : ControllerBase
     {
-        private readonly UserManager<Player> _userManager;
-        private readonly IPlayerService _playerService;
-        private readonly ITokenService _tokenService;
-        private readonly SignInManager<Player> _signInManager;
-        private readonly ILogger<PlayerController> _logger;
+        private readonly IPlayerService _playerService = playerService;
+        private readonly ILogger<PlayerController> _logger = logger;
 
-        public PlayerController(UserManager<Player> userManager, IPlayerService playerService, ITokenService tokenService, SignInManager<Player> signInManager, ILogger<PlayerController> logger)
-        {
-            _userManager = userManager;
-            _playerService = playerService;
-            _tokenService = tokenService;
-            _signInManager = signInManager;
-            _logger = logger;
-        }
+        /* Commented Methods are the ones not used in practice */
 
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllPlayers()
-        {
-            var players = await _playerService.GetAllPlayersSimplifiedAsync();
-            return Ok(players);
-        }
+        // [HttpGet("all")]
+        // public async Task<IActionResult> GetAllPlayers()
+        // {
+        //     var players = await _playerService.GetAllPlayersSimplifiedAsync();
+        //     return Ok(players);
+        // }
 
-        [HttpGet("all-connected")]
-        public IActionResult GetAllConnectedPlayers()
-        {
-            var players = PlayerManager.GetAllConnectedPlayers();
-            return Ok(players);
-        }
+        // [HttpGet("all-connected")]
+        // public IActionResult GetAllConnectedPlayers()
+        // {
+        //     var players = PlayerManager.GetAllConnectedPlayers();
+        //     return Ok(players);
+        // }
 
-        [HttpGet("details/{id}")]
-        public async Task<IActionResult> GetPlayerDetails(string id)
-        {
-            var player = await _playerService.GetPlayerSimplifiedByIdAsync(id);
+        // [HttpGet("details/{id}")]
+        // public async Task<IActionResult> GetPlayerDetails(string id)
+        // {
+        //     var player = await _playerService.GetPlayerSimplifiedByIdAsync(id);
 
-            if (player == null)
-                return NotFound("Player not found.");
+        //     if (player == null)
+        //         return NotFound("Player not found.");
 
-            return Ok(player);
-        }
+        //     return Ok(player);
+        // }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] PlayerRegisterRequestDto dto)

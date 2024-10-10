@@ -1,29 +1,20 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using api.Dtos.Player;
 using api.Mappers;
 using api.Models;
-using api.Singletons;
+using api.Managers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Services
 {
-    public class PlayerService : IPlayerService
+    public class PlayerService(
+        UserManager<Player> userManager,
+        SignInManager<Player> signInManager,
+        ITokenService tokenService) : IPlayerService
     {
-        private readonly UserManager<Player> _userManager;
-        private readonly SignInManager<Player> _signInManager;
-        private readonly ITokenService _tokenService;
-
-        public PlayerService(
-            UserManager<Player> userManager,
-            SignInManager<Player> signInManager,
-            ITokenService tokenService)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _tokenService = tokenService;
-        }
+        private readonly UserManager<Player> _userManager = userManager;
+        private readonly SignInManager<Player> _signInManager = signInManager;
+        private readonly ITokenService _tokenService = tokenService;
 
         public async Task PingDatabaseAsync()
         {

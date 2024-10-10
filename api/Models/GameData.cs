@@ -1,6 +1,5 @@
 using api.Dtos.Lobby;
 using api.Mappers;
-using static api.Models.Game;
 
 namespace api.Models
 {

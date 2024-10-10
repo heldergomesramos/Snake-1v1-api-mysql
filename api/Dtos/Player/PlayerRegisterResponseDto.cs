@@ -1,5 +1,6 @@
 namespace api.Dtos.Player
 {
+    /* Same as PlayerClient but with a token */
     public class PlayerRegisterResponseDto
     {
         public string Token { get; set; } = string.Empty;

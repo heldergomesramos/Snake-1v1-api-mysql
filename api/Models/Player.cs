@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace api.Models
 {
+    /* The only class stored in the database. Inherits Identity */
     public class Player : IdentityUser
     {
         public int Wins { get; set; } = 0;

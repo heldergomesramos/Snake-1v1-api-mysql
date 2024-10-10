@@ -1,22 +1,14 @@
-using api.Data;
 using api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
     [Route("api/app")]
     [ApiController]
-    public class AppController : ControllerBase
+    public class AppController(ILogger<AppController> logger, IPlayerService playerService) : ControllerBase
     {
-        private readonly ILogger<AppController> _logger;
-        private readonly IPlayerService _playerService;
-
-        public AppController(ILogger<AppController> logger, IPlayerService playerService)
-        {
-            _logger = logger;
-            _playerService = playerService;
-        }
+        private readonly ILogger<AppController> _logger = logger;
+        private readonly IPlayerService _playerService = playerService;
 
         [HttpGet("ping")]
         public async Task<IActionResult> Ping()

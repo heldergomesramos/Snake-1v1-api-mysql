@@ -3,7 +3,7 @@ using api.Dtos.Player;
 using api.Mappers;
 using api.Services;
 
-namespace api.Singletons
+namespace api.Managers
 {
     public class PlayerManager
     {

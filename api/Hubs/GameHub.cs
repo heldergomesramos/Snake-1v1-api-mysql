@@ -1,7 +1,7 @@
 using api.Mappers;
 using api.Models;
 using api.Services;
-using api.Singletons;
+using api.Managers;
 using Microsoft.AspNetCore.SignalR;
 
 namespace api.Hubs
