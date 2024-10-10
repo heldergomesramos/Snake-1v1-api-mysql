@@ -66,32 +66,10 @@ namespace api.Controllers
                 if (dto.Username.StartsWith("Guest"))
                     return StatusCode(400, new { message = "Username cannot start with \"Guest\"." });
 
-                var user = new Player
-                {
-                    UserName = dto.Username,
-                };
-
-                var createdUser = await _userManager.CreateAsync(user, dto.Password);
-
-                if (createdUser.Succeeded)
-                {
-                    var roleResult = await _userManager.AddToRoleAsync(user, "User");
-
-                    if (roleResult.Succeeded)
-                    {
-                        var token = _tokenService.CreateToken(user);
-
-                        var responseDto = PlayerMappers.PlayerEntityToPlayerRegister(user, token);
-
-                        return Ok(responseDto);
-                    }
-                    else
-                        return StatusCode(500, new { message = roleResult.Errors });
-                }
-                else
-                {
-                    return StatusCode(409, new { message = createdUser.Errors });
-                }
+                var responseDto = await _playerService.RegisterPlayerAsync(dto);
+                if (responseDto == null)
+                    return StatusCode(409, new { message = "Username already exists." });
+                return Ok(responseDto);
             }
             catch (Exception e)
             {

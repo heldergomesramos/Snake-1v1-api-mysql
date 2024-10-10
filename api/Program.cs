@@ -33,20 +33,20 @@ builder.Services.AddIdentity<Player, IdentityRole>(options =>
     options.Password.RequiredUniqueChars = 0;
 }).AddEntityFrameworkStores<ApplicationDBContext>();
 
-// builder.Services.AddAuthentication().AddJwtBearer(options =>
-// {
-//     var x = builder.Configuration["JWT:SigningKey"];
-//     x ??= "A"; /* Only here because null warning */
-//     options.TokenValidationParameters = new TokenValidationParameters
-//     {
-//         ValidateIssuer = true,
-//         ValidIssuer = builder.Configuration["JWT:Issuer"],
-//         ValidateAudience = true,
-//         ValidAudience = builder.Configuration["JWT:Audience"],
-//         ValidateIssuerSigningKey = true,
-//         IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(x))
-//     };
-// });
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    var x = builder.Configuration["JWT:SigningKey"];
+    x ??= "A"; /* Only here because null warning */
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["JWT:Audience"],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(x))
+    };
+});
 
 builder.Services.AddCors(options =>
 {
@@ -55,17 +55,6 @@ builder.Services.AddCors(options =>
                           .AllowAnyMethod()
                           .AllowAnyHeader());
 });
-
-// builder.Services.AddCors(options =>
-//     {
-//         options.AddPolicy("AllowAll", builder =>
-//         {
-//             builder
-//                 .AllowAnyOrigin()
-//                 .AllowAnyMethod()
-//                 .AllowAnyHeader();
-//         });
-//     });
 
 builder.Services.AddSignalR(o =>
 {
@@ -80,16 +69,7 @@ builder.Services.Configure<AzureFileLoggerOptions>(options =>
     options.RetainedFileCountLimit = 5;
 });
 
-//builder.Logging.ClearProviders();
-//builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
-
 var app = builder.Build();
-
-// using (var scope = app.Services.CreateScope())
-// {
-//     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-//     dbContext.Database.Migrate();
-// }
 
 if (app.Environment.IsDevelopment())
 {
@@ -98,11 +78,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowSpecificOrigin");
-//app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<GameHub>("/gameHub");
