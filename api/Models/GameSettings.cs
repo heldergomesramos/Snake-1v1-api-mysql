@@ -7,7 +7,7 @@ namespace api.Models
         public int Speed { get; set; } = 3;
         public int Width { get; set; } = 10;
         public int Height { get; set; } = 10;
-        public int Time { get; set; } = 120;
+        public int Time { get; set; } = 90;
         public bool Borders { get; set; } = false;
         public bool Abilities { get; set; } = true;
         public int Map { get; set; } = 0;
@@ -39,7 +39,7 @@ namespace api.Models
                 Speed = speed,
                 Width = random.Next(10, 21),
                 Height = random.Next(10, 21),
-                Time = 120,
+                Time = 90,
                 Borders = random.Next(0, 2) == 1,
                 Abilities = true,
                 Map = random.Next(0, 2)
@@ -55,8 +55,8 @@ namespace api.Models
             {
                 var gameSettings = new GameSettings();
                 gameSettings.Speed = ProcessGameSetting(jsonElement, "speed", gameSettings.Speed, 1, 10);
-                gameSettings.Width = ProcessGameSetting(jsonElement, "width", gameSettings.Width, 10, 40);
-                gameSettings.Height = ProcessGameSetting(jsonElement, "height", gameSettings.Height, 10, 40);
+                gameSettings.Width = ProcessGameSetting(jsonElement, "width", gameSettings.Width, 8, 40);
+                gameSettings.Height = ProcessGameSetting(jsonElement, "height", gameSettings.Height, 2, 40);
                 gameSettings.Time = ProcessGameSetting(jsonElement, "time", gameSettings.Time, 10, 999);
                 gameSettings.Map = ProcessGameSettingLoop(jsonElement, "map", 3);
                 gameSettings.Borders = ProcessGameBooleanSetting(jsonElement, "borders", gameSettings.Borders);

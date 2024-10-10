@@ -1,10 +1,8 @@
-using api.Dtos.Lobby;
 using api.Mappers;
 using api.Models;
 using api.Services;
 using api.Singletons;
 using Microsoft.AspNetCore.SignalR;
-
 
 namespace api.Hubs
 {
