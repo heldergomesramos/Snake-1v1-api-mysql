@@ -153,7 +153,6 @@ namespace api.Models
                 if (GState == GameState.Finished)
                     break;
                 Time -= 1000;
-                //Console.WriteLine("1 second passed: " + Time);
                 try
                 {
                     await onTick(this, false, false, false, false);
@@ -180,7 +179,6 @@ namespace api.Models
                 freezeThisTick = false;
                 cutTailThisTick = false;
             }
-            //Console.WriteLine("Game has ended");
         }
 
         public static string GetOppositeDirection(string ogDirection)
@@ -475,7 +473,6 @@ namespace api.Models
             if (!InputBuffer.ContainsKey(playerId))
                 InputBuffer[playerId] = new Queue<char>();
 
-            //Console.WriteLine("Receive direction command: " + command);
             InputBuffer[playerId].Enqueue(command);
         }
 
@@ -513,10 +510,7 @@ namespace api.Models
                 var nextInQueue = buffer.Dequeue();
                 buffer.Clear();
                 buffer.Enqueue(nextInQueue);
-                //Console.WriteLine(" Store: " + nextInQueue);
             }
-            //Console.WriteLine("Use: " + validCommand);
-            //Console.WriteLine("How the buffer is at the end: " + buffer.Count);
             return validCommand;
         }
 

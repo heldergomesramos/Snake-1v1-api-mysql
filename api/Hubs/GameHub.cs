@@ -6,16 +6,10 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace api.Hubs
 {
-    public class GameHub : Hub
+    public class GameHub(IPlayerService playerService, IHubContext<GameHub> hubContext) : Hub
     {
-        private readonly IPlayerService _playerService;
-        private readonly IHubContext<GameHub> _hubContext;
-
-        public GameHub(IPlayerService playerService, IHubContext<GameHub> hubContext)
-        {
-            _playerService = playerService;
-            _hubContext = hubContext;
-        }
+        private readonly IPlayerService _playerService = playerService;
+        private readonly IHubContext<GameHub> _hubContext = hubContext;
 
         public override async Task OnConnectedAsync()
         {
@@ -183,7 +177,7 @@ namespace api.Hubs
                    catch (Exception ex)
                    {
                        Console.WriteLine("Exception during SendAsync:");
-                       Console.WriteLine(ex.ToString()); // Print exception details
+                       Console.WriteLine(ex.ToString());
                    }
                }));
         }
@@ -201,7 +195,6 @@ namespace api.Hubs
             var player = PlayerManager.GetPlayerSimplifiedByConnectionId(Context.ConnectionId);
             if (player == null)
                 return;
-            //Console.WriteLine("Leave game: " + player.Username + " l: " + player.Lobby.LobbyId + " g: " + player.Game.GameId);
             var game = player.Game;
             if (game == null)
             {

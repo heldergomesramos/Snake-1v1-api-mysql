@@ -82,7 +82,7 @@ namespace api.Models
                 else if (property.ValueKind == JsonValueKind.Number && property.TryGetInt32(out var numericValue))
                     return Math.Clamp(numericValue, minValue, maxValue);
             }
-            return defaultValue; // Use the default if property doesn't exist, is null, or invalid
+            return defaultValue;
         }
 
         public static int ProcessGameSettingLoop(JsonElement jsonElement, string propertyName, int maxValue)
@@ -95,7 +95,7 @@ namespace api.Models
                 else if (property.ValueKind == JsonValueKind.Number && property.TryGetInt32(out var numericValue))
                     return (numericValue % maxValue + maxValue) % maxValue;
             }
-            return 0; // Use the default if property doesn't exist, is null, or invalid
+            return 0;
         }
 
         public static bool ProcessGameBooleanSetting(JsonElement jsonElement, string propertyName, bool currentValue)
