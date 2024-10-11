@@ -2,6 +2,7 @@ using api.Dtos.Lobby;
 using api.Dtos.Player;
 using api.Hubs;
 using api.Managers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -34,7 +35,7 @@ namespace api.Controllers
         //     return Ok(new { lobby = LobbyMappers.ToResponseDto(lobby) });
         // }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("create-private-lobby")]
         public async Task<IActionResult> CreatePrivateLobby([FromBody] PlayerIdDto dto)
         {
