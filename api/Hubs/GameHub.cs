@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace api.Hubs
 {
+    [Authorize]
     public class GameHub(IPlayerService playerService, IHubContext<GameHub> hubContext) : Hub
     {
         private readonly IPlayerService _playerService = playerService;
@@ -46,7 +47,6 @@ namespace api.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        [Authorize]
         public async Task Ping()
         {
             await Clients.Caller.SendAsync("Pong");

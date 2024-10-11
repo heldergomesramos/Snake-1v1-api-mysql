@@ -61,6 +61,21 @@ builder.Services.AddAuthentication(options =>
         {
             Console.WriteLine("Token validation failed: " + context.Exception.Message);
             return Task.CompletedTask;
+        },
+        OnMessageReceived = context =>
+        {
+            // This checks if the token is being sent in the query string
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            // If the request is for your SignalR hub...
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/gameHub"))
+            {
+                // Read the token out of the query string
+                Console.WriteLine("Its from SignalR, token: " + accessToken);
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
         }
     };
 });
