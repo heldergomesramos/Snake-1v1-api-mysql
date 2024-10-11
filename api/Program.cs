@@ -40,11 +40,11 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
     key ??= "A"; /* Only here because null warning */
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
+        ValidateIssuer = true,
         ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = false,
+        ValidateAudience = true,
         ValidAudience = builder.Configuration["JWT:Audience"],
-        ValidateIssuerSigningKey = false,
+        ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(key)),
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero

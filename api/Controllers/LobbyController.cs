@@ -34,10 +34,18 @@ namespace api.Controllers
         //     return Ok(new { lobby = LobbyMappers.ToResponseDto(lobby) });
         // }
 
-        [Authorize]
         [HttpPost("create-private-lobby")]
         public async Task<IActionResult> CreatePrivateLobby([FromBody] PlayerIdDto dto)
         {
+            var authHeader = Request.Headers["Authorization"];
+            if (string.IsNullOrEmpty(authHeader))
+            {
+                Console.WriteLine("Authorization header is missing.");
+                return Unauthorized();
+            }
+
+            Console.WriteLine("Authorization header received: " + authHeader);
+
             if (dto == null)
                 return BadRequest(new { message = "Request body cannot be null." });
 
