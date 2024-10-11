@@ -36,16 +36,16 @@ builder.Services.AddIdentity<Player, IdentityRole>(options =>
 
 builder.Services.AddAuthentication().AddJwtBearer(options =>
 {
-    var x = builder.Configuration["JWT:SigningKey"];
-    x ??= "A"; /* Only here because null warning */
+    var key = builder.Configuration["JWT:SigningKey"];
+    key ??= "A"; /* Only here because null warning */
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
+        ValidateIssuer = false,
         ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
+        ValidateAudience = false,
         ValidAudience = builder.Configuration["JWT:Audience"],
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(x)),
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(key)),
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
