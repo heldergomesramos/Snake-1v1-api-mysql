@@ -37,7 +37,7 @@ namespace api.Controllers
         [HttpPost("create-private-lobby")]
         public async Task<IActionResult> CreatePrivateLobby([FromBody] PlayerIdDto dto)
         {
-            var authHeader = Request.Headers["Authorization"];
+            var authHeader = Request.Headers.Authorization;
             if (string.IsNullOrEmpty(authHeader))
             {
                 Console.WriteLine("Authorization header is missing.");
@@ -45,6 +45,14 @@ namespace api.Controllers
             }
 
             Console.WriteLine("Authorization header received: " + authHeader);
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                Console.WriteLine("User is not authenticated.");
+                return Unauthorized();
+            }
+
+            Console.WriteLine("User is authenticated, Token is valid.");
 
             if (dto == null)
                 return BadRequest(new { message = "Request body cannot be null." });
