@@ -26,7 +26,7 @@ namespace api.Services
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Expires = DateTime.Now.AddHours(3),
+                Expires = DateTime.Now.AddHours(1),
                 SigningCredentials = creds,
                 Issuer = _config["JWT:Issuer"],
                 Audience = _config["JWT:Audience"]

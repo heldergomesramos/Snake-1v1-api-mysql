@@ -2,7 +2,6 @@ using api.Dtos.Lobby;
 using api.Dtos.Player;
 using api.Hubs;
 using api.Managers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -35,7 +34,7 @@ namespace api.Controllers
         //     return Ok(new { lobby = LobbyMappers.ToResponseDto(lobby) });
         // }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize]
         [HttpPost("create-private-lobby")]
         public async Task<IActionResult> CreatePrivateLobby([FromBody] PlayerIdDto dto)
         {
@@ -65,7 +64,7 @@ namespace api.Controllers
             });
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize]
         [HttpPost("join-private-lobby")]
         public async Task<IActionResult> JoinPrivateLobby([FromBody] JoinPrivateLobbyRequestDto dto)
         {
@@ -95,7 +94,7 @@ namespace api.Controllers
             });
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize]
         [HttpPost("leave-private-lobby")]
         public async Task<IActionResult> LeavePrivateLobby([FromBody] PlayerIdDto dto)
         {

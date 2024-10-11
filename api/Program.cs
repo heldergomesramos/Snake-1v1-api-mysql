@@ -34,7 +34,11 @@ builder.Services.AddIdentity<Player, IdentityRole>(options =>
     options.Password.RequiredUniqueChars = 0;
 }).AddEntityFrameworkStores<ApplicationDBContext>();
 
-builder.Services.AddAuthentication().AddJwtBearer(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
 {
     var key = Environment.GetEnvironmentVariable("JWT_SIGNING_KEY") ?? throw new InvalidOperationException("Signing key must be configured.");
     options.TokenValidationParameters = new TokenValidationParameters
