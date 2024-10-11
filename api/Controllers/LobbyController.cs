@@ -34,7 +34,6 @@ namespace api.Controllers
         //     return Ok(new { lobby = LobbyMappers.ToResponseDto(lobby) });
         // }
 
-        [Authorize]
         [HttpPost("create-private-lobby")]
         public async Task<IActionResult> CreatePrivateLobby([FromBody] PlayerIdDto dto)
         {
