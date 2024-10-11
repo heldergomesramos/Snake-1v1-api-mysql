@@ -36,17 +36,19 @@ builder.Services.AddIdentity<Player, IdentityRole>(options =>
 
 builder.Services.AddAuthentication().AddJwtBearer(options =>
 {
-    var key = builder.Configuration["JWT:SigningKey"];
-    key ??= "A"; /* Only here because null warning */
+    var key = Environment.GetEnvironmentVariable("JWT_SIGNING_KEY") ?? throw new InvalidOperationException("Signing key must be configured.");
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(key)),
+        ValidateAudience = true,
         ValidateLifetime = true,
+
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidAudience = builder.Configuration["JWT:Audience"],
+
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(key)),
+
         ClockSkew = TimeSpan.Zero
     };
     options.Events = new JwtBearerEvents

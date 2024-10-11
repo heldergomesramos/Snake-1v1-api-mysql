@@ -13,11 +13,8 @@ namespace api.Services
         public TokenService(IConfiguration config)
         {
             _config = config;
-            var cfg = _config["JWT:SigningKey"];
-            if (cfg != null)
-                _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg));
-            else
-                _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("a")); // This will never happen (its only here to avoid warnings)
+            var cfg = Environment.GetEnvironmentVariable("JWT_SIGNING_KEY") ?? throw new InvalidOperationException("Signing key must be configured.");
+            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg));
         }
 
         public string CreateToken(Player user)
