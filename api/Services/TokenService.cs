@@ -1,5 +1,4 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using api.Models;
 using Microsoft.IdentityModel.Tokens;
@@ -25,21 +24,16 @@ namespace api.Services
         {
             if (user == null || string.IsNullOrEmpty(user.UserName))
                 return string.Empty;
-            var claims = new List<Claim>
-            {
-                new(JwtRegisteredClaimNames.GivenName, user.UserName)
-            };
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature);
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddHours(3),
                 SigningCredentials = creds,
                 Issuer = _config["JWT:Issuer"],
                 Audience = _config["JWT:Audience"]
             };
-
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
