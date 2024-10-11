@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace api.Hubs
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     public class GameHub(IPlayerService playerService, IHubContext<GameHub> hubContext) : Hub
     {
         private readonly IPlayerService _playerService = playerService;
