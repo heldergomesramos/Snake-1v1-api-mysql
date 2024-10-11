@@ -1,4 +1,4 @@
-# 🐍 Snake 1v1 API (MySQL)
+# 🐍 Snake 1v1 API
 This is the ASP.NET Core backend API for the Snake 1v1 game, designed for deployment on Azure and using a MySQL database.
 
 ## 🚀 Live Version
