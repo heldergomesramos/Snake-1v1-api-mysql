@@ -207,14 +207,13 @@ namespace api.Models
             return Lobby.Player1 != null && Lobby.Player1.PlayerId == playerId;
         }
 
-        public void UseAbility(string playerId)
+        public void UseAbility(PlayerSimplified player)
         {
-            if (GState != GameState.InProgress || !Lobby.GameSettings!.Abilities)
+            if (GState != GameState.InProgress || !Lobby.GameSettings!.Abilities || player == null)
                 return;
-            var player = GetPlayerSimplifiedByPlayerId(playerId);
-            if (player == null)
-                return;
-            if ((IsPlayer1(playerId) && Player1Cooldown > 0) || Player2Cooldown > 0)
+
+            string playerId = player.PlayerId;
+            if (IsPlayer1(playerId) && Player1Cooldown > 0 || !IsPlayer1(playerId) && Player2Cooldown > 0)
                 return;
 
             var playerSnake = Snakes[player.PlayerId];
@@ -810,7 +809,7 @@ namespace api.Models
             Random rand = new();
 
             int baseNumberOfPools = Width * Height / QUICK_SAND_DIVISOR;
-            int adjustment = rand.Next(0, 3) - 1;
+            int adjustment = rand.Next(0, 2) - 1;
             int numberOfPools = baseNumberOfPools + adjustment;
 
             for (int i = 0; i < numberOfPools; i++)

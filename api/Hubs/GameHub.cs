@@ -287,7 +287,7 @@ namespace api.Hubs
             var game = player.Game;
             if (game.GState == Game.GameState.Finished)
                 return;
-            game.UseAbility(player.PlayerId);
+            game.UseAbility(player);
         }
 
         /* Static Methods */
