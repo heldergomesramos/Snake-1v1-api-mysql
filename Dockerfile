@@ -24,4 +24,4 @@ EXPOSE 80
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Start the application
-ENTRYPOINT ["dotnet", "Snake-1v1-api.dll"]
+ENTRYPOINT ["dotnet", "api.dll"]
